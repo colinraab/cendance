@@ -43,10 +43,10 @@ empty directories, and any `.DS_Store` files inside them are ignored.
 - [x] Run a secret scanner against the curated snapshot.
 - [x] Confirm no tracked file contains the old project name or private absolute
       filesystem paths.
-- [ ] Clone the private repository with `--recurse-submodules` into a clean
+- [x] Clone the private repository with `--recurse-submodules` into a clean
       directory.
-- [ ] Configure, build, and run the full test suite from that clean clone.
-- [ ] Review the complete initial commit on GitHub before changing visibility.
+- [x] Configure, build, and run the full test suite from that clean clone.
+- [x] Review the complete initial commit on GitHub before changing visibility.
 
 ## History and identity
 
