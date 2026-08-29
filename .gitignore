@@ -1,0 +1,111 @@
+# Compiler and linker output
+*.d
+*.slo
+*.lo
+*.o
+*.obj
+*.gch
+*.pch
+*.so
+*.dylib
+*.dll
+*.mod
+*.smod
+*.lai
+*.la
+*.a
+*.lib
+*.exe
+*.out
+*.app
+*.i64
+*.ilk
+*.pdb
+*.exp
+*.dSYM/
+
+# CMake and build directories
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+CMakeUserPresets.json
+/build/
+/build-*/
+/cmake-build-*/
+/Builds/
+/out/
+/dist/
+/bin/
+/lib/
+/JUCE/build/
+
+# Test, analysis, and profiling output
+/.cache/
+/analysis/
+/coverage/
+/Testing/
+*.gcda
+*.gcno
+*.profraw
+*.profdata
+
+# Local cendance output
+/output.wav
+/output.flac
+/recordings/
+/local-projects/
+*.log
+
+# Local configuration, credentials, and signing material
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+*.der
+*.jks
+*.keystore
+*.mobileprovision
+
+# OS-generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project-level VS Code settings are intentionally tracked. Keep other local
+# workspace state out of the repository.
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Local development and assistant state
+.agents/
+.hermes/
+.codex/
+.claude/
+.cursor/
+.cursorrules
+.aider*
+
+# Temporary and backup files
+*.bak
+*.tmp
+*.temp
