@@ -20,16 +20,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: macOS 15 arm64 Debug
+          - name: macOS 15 arm64 Release
             runner: macos-15
-            build_type: Debug
+            build_type: Release
             deployment_target: "15.0"
-            package: false
           - name: macOS 15 Intel Release
             runner: macos-15-intel
             build_type: Release
             deployment_target: "15.0"
-            package: true
     runs-on: ${{ matrix.runner }}
 
     steps:
@@ -55,5 +53,12 @@ jobs:
         run: ctest --test-dir build --output-on-failure
 
       - name: Build release archive
-        if: matrix.package
         run: cmake --build build --target package --parallel 3
+
+      - name: Upload release archive
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cendance-${{ runner.os }}-${{ runner.arch }}
+          path: build/cendance-*.tar.gz
+          if-no-files-found: error
+          retention-days: 14

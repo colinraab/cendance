@@ -8,7 +8,9 @@ It uses JUCE for audio/DSP and FTXUI for the keyboard-driven interface.
 - macOS is the primary path today. CI validates macOS 15 on both Apple Silicon
   and Intel; CMake targets macOS 13 by default, but macOS 13–14 runtime
   compatibility is not yet release-validated.
-- Packaged public releases are not published yet.
+- The v0.1.0 release is planned as an unsigned macOS developer preview;
+  Gatekeeper may warn because Developer ID signing and notarization are not yet
+  configured.
 - Windows is not release-ready yet.
 
 ## Quick Start
@@ -79,7 +81,7 @@ responses retain their respective licenses; see
 
 Before inviting broad public use:
 
-1. Confirm the new macOS arm64 and Intel CI jobs pass on GitHub.
-2. Publish macOS release artifacts with SHA-256 checksums.
+1. Confirm the macOS arm64 and Intel Release CI jobs pass on GitHub.
+2. Publish the CI-built macOS archives with SHA-256 checksums.
 3. Add Apple Developer ID signing and notarization for the polished macOS release.
 4. Complete the Windows portability checklist before advertising Windows support.

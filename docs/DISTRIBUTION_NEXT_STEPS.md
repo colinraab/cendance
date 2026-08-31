@@ -23,11 +23,10 @@ as a consumer-ready download.
 
 Address these before inviting broad external users:
 
-1. Confirm the new macOS arm64 and x86_64 CI jobs pass in GitHub Actions.
-2. Decide whether the first release is unsigned "developer preview" or signed
-   and notarized macOS distribution.
-3. Publish SHA-256 checksums for every release artifact.
-4. Decide whether CPack tarballs are acceptable or whether the first polished
+1. Confirm the macOS arm64 and x86_64 Release jobs pass in GitHub Actions.
+2. Publish the first release as an explicitly unsigned developer preview.
+3. Publish SHA-256 checksums for every preview artifact.
+4. Decide whether CPack tarballs remain acceptable or whether the first polished
    macOS artifact should be a signed `.pkg` installer.
 5. Enable GitHub private vulnerability reporting and recommended branch
    protections before making the repository public.
@@ -123,10 +122,11 @@ the entitlements required by a concrete notarization or runtime failure.
 
 ### macOS Continuous Integration
 
-`.github/workflows/ci.yml` builds and tests Debug on macOS 15 arm64 and Release
-on macOS 15 Intel. The Release job also exercises CPack. Keep release publishing
-separate from pull-request CI: a tag-triggered release workflow should sign,
-notarize, checksum, and upload only after both build jobs pass.
+`.github/workflows/ci.yml` builds, tests, and packages Release on macOS 15 arm64
+and Intel. Both archives are retained as short-lived workflow artifacts. Keep
+polished release publishing separate from pull-request CI: a tag-triggered
+release workflow should sign, notarize, checksum, and upload only after both
+build jobs pass.
 
 ## Homebrew
 
