@@ -109,7 +109,12 @@ inline juce::var varGet(const juce::var& v, const char* key) {
     return v.getProperty(key, juce::var());
 }
 
+inline void isolateAppDataForTests() {
+    static TempDir dir("cendance_app_data_test");
+    setenv("CENDANCE_DATA_DIR", dir.dir.getFullPathName().toRawUTF8(), 1);
+}
+
 inline void isolateToSConfigForTests() {
-    static TempDir dir("cendance_tos_test");
-    setenv("CENDANCE_CONFIG_DIR", dir.dir.getFullPathName().toRawUTF8(), 1);
+    isolateAppDataForTests();
+    setenv("CENDANCE_CONFIG_DIR", std::getenv("CENDANCE_DATA_DIR"), 1);
 }

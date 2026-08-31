@@ -48,8 +48,6 @@ CliParseResult parseCommandLine(int argc, char* argv[]) {
                       << "  --advertise-name <n>  Set mDNS service name (default: hostname)\n"
                       << "  --record <path>       Record output to file on startup\n"
                       << "  --record-format <fmt> Recording format: wav:f32, wav:s16, flac:24, flac:16\n"
-                      << "  --audio-stream <tgt>  Stream raw audio to stdout or tcp://host:port\n"
-                      << "  --stream-format <fmt> Stream format: f32le or s16le (default: f32le)\n"
                       << "  --mcp                 Run headless MCP stdio server\n";
             return {options, 0};
         } else if (arg == "--mcp") {
@@ -62,10 +60,6 @@ CliParseResult parseCommandLine(int argc, char* argv[]) {
             options.recordPath = argv[++i];
         } else if (arg == "--record-format" && i + 1 < argc) {
             options.recordFormat = argv[++i];
-        } else if (arg == "--audio-stream" && i + 1 < argc) {
-            options.audioStreamTarget = argv[++i];
-        } else if (arg == "--stream-format" && i + 1 < argc) {
-            options.audioStreamFormat = argv[++i];
         } else {
             std::cerr << "Unknown argument: " << arg << std::endl;
             return {options, 1};
@@ -74,6 +68,14 @@ CliParseResult parseCommandLine(int argc, char* argv[]) {
 
     if (options.agentPort < 0 || options.agentPort > 65535) {
         std::cerr << "Agent port must be between 0 and 65535." << std::endl;
+        return {options, 1};
+    }
+
+    if (options.recordFormat != "wav:f32"
+        && options.recordFormat != "wav:s16"
+        && options.recordFormat != "flac:24"
+        && options.recordFormat != "flac:16") {
+        std::cerr << "Invalid recording format: " << options.recordFormat << std::endl;
         return {options, 1};
     }
 

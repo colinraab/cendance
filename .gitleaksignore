@@ -1,0 +1,3 @@
+JUCE/examples/Assets/google-services.json:gcp-api-key:24
+JUCE/examples/DemoRunner/Builds/Android/app/src/main/assets/google-services.json:gcp-api-key:24
+JUCE/extras/AudioPluginHost/Builds/Android/app/src/main/assets/google-services.json:gcp-api-key:24

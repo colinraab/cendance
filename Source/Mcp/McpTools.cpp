@@ -12,7 +12,7 @@
 
 juce::var McpServer::toolSchemas()
 {
-    return juce::JSON::parse (R"json([
+    return juce::JSON::parse (juce::String::fromUTF8(R"json([
     {"name":"send_cendance_command","description":"Send a raw cendance agent protocol command and return its JSON response.","inputSchema":{"type":"object","required":["command"],"properties":{"command":{"type":"string"}}}},
     {"name":"get_cendance_state","description":"Get the current cendance state snapshot.","inputSchema":{"type":"object","properties":{"full":{"type":"boolean","default":false}}}},
     {"name":"get_cendance_catalog","description":"Get a cendance catalog: algorithms, sounds, effects, progressions, or presets.","inputSchema":{"type":"object","required":["kind"],"properties":{"kind":{"type":"string","enum":["algorithms","sounds","effects","progressions","presets"]}}}},
@@ -69,9 +69,6 @@ juce::var McpServer::toolSchemas()
     ,{"name":"start_recording","description":"Start recording the audio output to a file.","inputSchema":{"type":"object","required":["path"],"properties":{"path":{"type":"string","description":"Output file path."},"format":{"type":"string","enum":["wav:f32","wav:s16","flac:24","flac:16"],"default":"wav:f32","description":"Recording format."}}}}
     ,{"name":"stop_recording","description":"Stop the current audio recording.","inputSchema":{"type":"object","properties":{}}}
     ,{"name":"get_recording_status","description":"Get the current recording status including duration and overrun info.","inputSchema":{"type":"object","properties":{}}}
-    ,{"name":"start_streaming","description":"Start streaming raw audio to stdout.","inputSchema":{"type":"object","properties":{"format":{"type":"string","enum":["f32le","s16le"],"default":"f32le","description":"Stream format."}}}}
-    ,{"name":"stop_streaming","description":"Stop the current audio stream.","inputSchema":{"type":"object","properties":{}}}
-    ,{"name":"get_streaming_status","description":"Get the current streaming status.","inputSchema":{"type":"object","properties":{}}}
     ,{"name":"set_swing","description":"Set the global swing amount. Shifts even 8th notes for a groovier feel.","inputSchema":{"type":"object","required":["amount"],"properties":{"amount":{"type":"number","minimum":0,"maximum":100,"description":"Swing amount: 0=straight, 50=triplet feel, 100=max."}}}}
     ,{"name":"get_swing","description":"Get the current global swing amount.","inputSchema":{"type":"object","properties":{}}}
     ,{"name":"set_humanize","description":"Set velocity humanization and timing jitter for a more organic feel.","inputSchema":{"type":"object","properties":{"velocity":{"type":"number","minimum":0,"maximum":100,"description":"Velocity randomization: 0=none, 100=±50 velocity range."},"timing":{"type":"number","minimum":0,"maximum":100,"description":"Timing jitter: 0=none, 100=±10ms max offset."}}}}
@@ -94,7 +91,7 @@ juce::var McpServer::toolSchemas()
 
 
 
-    ])json");
+    ])json"));
 }
 
 //==============================================================================
@@ -378,17 +375,6 @@ juce::var McpServer::handleToolsCall (juce::var const& params, const juce::var& 
         else if (toolName == "stop_recording") action = "stop";
         else action = "status";
         cmd = "record " + juce::String(action) + " " + juce::JSON::toString(args, false);
-    }
-
-    // ─── Streaming tools ───
-    else if (toolName == "start_streaming"
-             || toolName == "stop_streaming"
-             || toolName == "get_streaming_status") {
-        std::string action;
-        if (toolName == "start_streaming") action = "start";
-        else if (toolName == "stop_streaming") action = "stop";
-        else action = "status";
-        cmd = "stream " + juce::String(action) + " " + juce::JSON::toString(args, false);
     }
 
     // ─── Groove / Swing / Humanize ───

@@ -1,6 +1,6 @@
 # cendance Distribution Next Steps
 
-Last reviewed: 2026-05-19
+Last reviewed: 2026-08-31
 
 ## Current State
 
@@ -8,10 +8,14 @@ cendance is close to an early public macOS release, but it is not yet packaged
 as a consumer-ready download.
 
 - App target: terminal-first JUCE + FTXUI executable, not a `.app` bundle.
-- Primary platform: macOS arm64, with macOS x86_64 expected through CI.
+- Primary platform: macOS. CI validates macOS 15 on arm64 and x86_64. CMake
+  targets macOS 13 by default, but macOS 13–14 runtime compatibility is not yet
+  release-validated.
 - Build system: CMake + JUCE submodule + FTXUI FetchContent + libsodium.
-- Tests: 20 CTest targets in the current build tree.
+- Tests: 22 CTest targets, with assertions kept active in Release builds.
 - MCP: built into the same binary; launch with `cendance --mcp`.
+- Packaging: CPack creates a `.tar.gz` containing the executable, software
+  license, audio license, IR provenance, and third-party notices.
 - Windows: not release-ready. Some code paths are still POSIX-only and the
   localhost agent protocol reports "not implemented on Windows yet."
 
@@ -19,14 +23,14 @@ as a consumer-ready download.
 
 Address these before inviting broad external users:
 
-1. Choose and add a root software `LICENSE`. Bundled audio licensing is
-   documented in `Resources/LICENSE.md`.
+1. Confirm the new macOS arm64 and x86_64 CI jobs pass in GitHub Actions.
 2. Decide whether the first release is unsigned "developer preview" or signed
    and notarized macOS distribution.
-3. Add release CI for macOS arm64 and x86_64.
-4. Publish checksums for every release artifact.
-5. Decide whether manual tarballs are acceptable or whether the first polished
+3. Publish SHA-256 checksums for every release artifact.
+4. Decide whether CPack tarballs are acceptable or whether the first polished
    macOS artifact should be a signed `.pkg` installer.
+5. Enable GitHub private vulnerability reporting and recommended branch
+   protections before making the repository public.
 6. Do a Windows portability pass before advertising Windows support.
 
 ## macOS Distribution
@@ -60,9 +64,8 @@ cmake -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build-release
 ctest --test-dir build-release --output-on-failure
 
-mkdir -p dist/macos-arm64
-cp build-release/cendance_artefacts/cendance dist/macos-arm64/cendance
-shasum -a 256 dist/macos-arm64/cendance > dist/macos-arm64/checksums.txt
+cmake --build build-release --target package
+shasum -a 256 build-release/cendance-*.tar.gz
 ```
 
 The current Ninja output path is `build-release/cendance_artefacts/cendance`;
@@ -118,59 +121,12 @@ No entitlements file is currently documented here because the app is a command
 line audio tool and no specific entitlement need has been identified. Add only
 the entitlements required by a concrete notarization or runtime failure.
 
-### macOS Release CI
+### macOS Continuous Integration
 
-Start with unsigned build artifacts, then add signing/notarization once the
-Developer ID certificates and notary credentials are available.
-
-```yaml
-name: Release
-
-on:
-  push:
-    tags:
-      - 'v*'
-
-jobs:
-  build-macos:
-    strategy:
-      matrix:
-        include:
-          - os: macos-14
-            arch: arm64
-          - os: macos-13
-            arch: x86_64
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Install dependencies
-        run: brew install cmake ninja libsodium
-
-      - name: Configure
-        run: cmake -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release
-
-      - name: Build
-        run: cmake --build build-release
-
-      - name: Test
-        run: ctest --test-dir build-release --output-on-failure
-
-      - name: Package tarball
-        run: |
-          mkdir -p dist
-          cp build-release/cendance_artefacts/cendance cendance
-          tar czf dist/cendance-macos-${{ matrix.arch }}.tar.gz cendance
-          shasum -a 256 dist/cendance-macos-${{ matrix.arch }}.tar.gz > dist/cendance-macos-${{ matrix.arch }}.sha256
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: cendance-macos-${{ matrix.arch }}
-          path: dist/*
-```
+`.github/workflows/ci.yml` builds and tests Debug on macOS 15 arm64 and Release
+on macOS 15 Intel. The Release job also exercises CPack. Keep release publishing
+separate from pull-request CI: a tag-triggered release workflow should sign,
+notarize, checksum, and upload only after both build jobs pass.
 
 ## Homebrew
 
@@ -181,10 +137,10 @@ GitHub Release exists.
 class Cendance < Formula
   desc "Terminal generative music app with an embedded MCP server"
   homepage "https://github.com/colinraab/cendance"
-  url "https://github.com/colinraab/cendance/releases/download/v0.1.0/cendance-macos-arm64.tar.gz"
+  url "https://github.com/colinraab/cendance/releases/download/v0.1.0/cendance-0.1.0-Darwin-arm64.tar.gz"
   sha256 "REPLACE_WITH_SHA256"
   version "0.1.0"
-  license "REPLACE_WITH_LICENSE"
+  license "AGPL-3.0-only"
 
   depends_on "libsodium"
 
@@ -271,9 +227,9 @@ After Homebrew install:
 
 ## Recommended Release Order
 
-1. Choose and add the root software `LICENSE`.
-2. Land macOS release CI.
-3. Publish unsigned preview tarballs with SHA-256 checksums.
+1. Confirm macOS arm64 and Intel CI pass on GitHub.
+2. Enable private vulnerability reporting and branch protection.
+3. Publish CPack preview tarballs with SHA-256 checksums.
 4. Enroll in the Apple Developer Program.
 5. Add Developer ID signing and notarized `.pkg` generation.
 6. Create a Homebrew tap.

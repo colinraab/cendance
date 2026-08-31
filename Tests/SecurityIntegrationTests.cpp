@@ -314,6 +314,7 @@ void testEmptyDataSigning() {
 }
 
 int main() {
+    isolateAppDataForTests();
     std::cout << "=== Security Integration Tests ===\n\n";
 
     testTwoKeypairSignVerify();

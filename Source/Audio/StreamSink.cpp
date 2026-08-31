@@ -166,9 +166,11 @@ void StreamSink::streamThreadFunc() {
     const int chunkSize = 4096;
     std::vector<float> interleaved(static_cast<size_t>(chunkSize * numChannels));
 
-    while (!stopRequested_.load(std::memory_order_acquire)) {
+    for (;;) {
         int framesRead = ring_->pop(interleaved.data(), chunkSize);
         if (framesRead <= 0) {
+            if (stopRequested_.load(std::memory_order_acquire))
+                break;
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
             continue;
         }

@@ -1,5 +1,6 @@
 #include "ArrangementPresetManager.h"
 #include "PresetRef.h"
+#include "../Config/AppDirectories.h"
 
 #include <juce_core/juce_core.h>
 
@@ -44,9 +45,13 @@ static bool writeFileContents(const juce::File& file, const std::string& content
 //==============================================================================
 
 ArrangementPresetManager::ArrangementPresetManager() {
-    rootDir_ = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory)
-                   .getChildFile("cendance")
-                   .getChildFile("arrangementPresets");
+    if (const char* overrideDir = std::getenv("CENDANCE_ARRANGEMENT_PRESETS_DIR");
+        overrideDir != nullptr && overrideDir[0] != '\0') {
+        rootDir_ = juce::File(juce::String(overrideDir));
+        return;
+    }
+
+    rootDir_ = AppDirectories::dataDirectory().getChildFile("arrangementPresets");
 }
 
 ArrangementPresetManager::~ArrangementPresetManager() = default;

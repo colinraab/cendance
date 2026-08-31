@@ -14,8 +14,6 @@ struct CliOptions {
     std::string advertiseName;
     std::string recordPath;
     std::string recordFormat = "wav:f32";
-    std::string audioStreamTarget;  // "stdout" or "tcp://host:port"
-    std::string audioStreamFormat = "f32le";
 };
 
 struct CliParseResult {

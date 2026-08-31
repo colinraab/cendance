@@ -5,7 +5,9 @@ It uses JUCE for audio/DSP and FTXUI for the keyboard-driven interface.
 
 ## Status
 
-- macOS source builds are the primary supported path today.
+- macOS is the primary path today. CI validates macOS 15 on both Apple Silicon
+  and Intel; CMake targets macOS 13 by default, but macOS 13–14 runtime
+  compatibility is not yet release-validated.
 - Packaged public releases are not published yet.
 - Windows is not release-ready yet.
 
@@ -26,6 +28,13 @@ Run the test suite:
 
 ```bash
 ctest --test-dir build-release --output-on-failure
+```
+
+Create a redistributable `.tar.gz` containing the executable and license
+notices:
+
+```bash
+cmake --build build-release --target package
 ```
 
 ## MCP Mode
@@ -53,6 +62,9 @@ cendance includes its MCP stdio server in the main binary:
 - Bundled asset licensing: [Resources/LICENSE.md](Resources/LICENSE.md)
 - Third-party notices: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
 - Terms template: [docs/TERMS_OF_SERVICE.md](docs/TERMS_OF_SERVICE.md)
+- Contributing guide: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Security policy: [SECURITY.md](SECURITY.md)
+- Code of conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 
 ## License
 
@@ -67,7 +79,7 @@ responses retain their respective licenses; see
 
 Before inviting broad public use:
 
-1. Publish macOS release artifacts with checksums.
-2. Include the license and third-party notices in release packages.
+1. Confirm the new macOS arm64 and Intel CI jobs pass on GitHub.
+2. Publish macOS release artifacts with SHA-256 checksums.
 3. Add Apple Developer ID signing and notarization for the polished macOS release.
 4. Complete the Windows portability checklist before advertising Windows support.

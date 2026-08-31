@@ -3,6 +3,7 @@
 #include "../App/AlgorithmPresetRegistry.h"
 #include "../App/ProjectIO.h"
 #include "../App/ProjectIOLoad.h"
+#include "../Config/AppDirectories.h"
 #include <juce_audio_formats/juce_audio_formats.h>
 #include <juce_core/juce_core.h>
 
@@ -400,9 +401,7 @@ std::string PresetSerializer::createCustomSoundPresetEnvelope(const AppState& ap
 }
 
 juce::File PresetSerializer::downloadDirectory() {
-    auto dir = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory)
-        .getChildFile(juce::String("cendance"))
-        .getChildFile(juce::String("downloads"));
+    auto dir = AppDirectories::dataDirectory().getChildFile("downloads");
     if (!dir.exists())
         dir.createDirectory();
     return dir;

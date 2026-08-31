@@ -218,6 +218,12 @@ void testMcpGenreToolsDispatchAgentCommands() {
     const std::string schemas = juce::JSON::toString(McpServer::toolSchemas(), false).toStdString();
     assert(schemas.find("set_genre") != std::string::npos);
     assert(schemas.find("randomize_for_genre") != std::string::npos);
+    assert(schemas.find("start_recording") != std::string::npos);
+    assert(schemas.find("stop_recording") != std::string::npos);
+    assert(schemas.find("recording_status") != std::string::npos);
+    assert(schemas.find("start_streaming") == std::string::npos);
+    assert(schemas.find("stop_streaming") == std::string::npos);
+    assert(schemas.find("streaming_status") == std::string::npos);
 
     auto makeCall = [](const char* name, juce::var args) {
         auto* params = new juce::DynamicObject();
@@ -453,23 +459,10 @@ void testHumanizeUnknownSubcommand() {
 // P0: Project command tests
 // ========================================================================
 
-void testProjectSaveCommand() {
-    Harness h;
-    auto resp = h.execute("project save test_project");
-    assert(resp.ok);
-    assert(resp.message.find("saved") != std::string::npos);
-}
-
 void testProjectLoadCommand() {
     Harness h;
-    // First save
-    auto save = h.execute("project save test_load_project");
-    assert(save.ok);
-    // Extract path from save response
-    // The response contains the path — load it
-    // For simplicity, just verify the command structure works
     auto load = h.execute("project load /nonexistent/file.cendance");
-    assert(!load.ok); // Should fail for nonexistent file
+    assert(!load.ok);
 }
 
 void testProjectListCommand() {
@@ -583,7 +576,6 @@ int main() {
     testHumanizeUnknownSubcommand();
 
     // P0: Project tests
-    testProjectSaveCommand();
     testProjectLoadCommand();
     testProjectListCommand();
     testProjectDeleteCommand();

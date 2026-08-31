@@ -229,6 +229,37 @@ void testMultiChannelStreaming() {
     assert(status.totalSamplesWritten > 0);
 }
 
+void testStopDrainsBufferedAudio() {
+    StreamSink sink;
+
+    StreamSink::Config config;
+    config.numChannels = 2;
+    config.sampleRate = 48000;
+    config.capacitySeconds = 2;
+    config.format = StreamSink::Format::F32LE;
+
+    size_t totalBytes = 0;
+    StreamSink::SinkFn sinkFn = [&totalBytes](const void*, size_t bytes) -> bool {
+        totalBytes += bytes;
+        return true;
+    };
+
+    assert(sink.start(config, sinkFn));
+
+    constexpr int frameCount = 48000;
+    std::vector<float> left(frameCount, 0.25f);
+    std::vector<float> right(frameCount, -0.25f);
+    const float* channels[2] = {left.data(), right.data()};
+    assert(sink.push(channels, frameCount) == frameCount);
+
+    // Stop immediately. The sink must deliver every frame accepted by its
+    // ring buffer before the worker exits.
+    sink.stop();
+
+    const size_t expectedBytes = static_cast<size_t>(frameCount * 2) * sizeof(float);
+    assert(totalBytes == expectedBytes);
+}
+
 // ========================================================================
 // Main
 // ========================================================================
@@ -254,6 +285,9 @@ int main() {
 
     testMultiChannelStreaming();
     std::cout << "  testMultiChannelStreaming passed\n";
+
+    testStopDrainsBufferedAudio();
+    std::cout << "  testStopDrainsBufferedAudio passed\n";
 
     std::cout << "StreamSink tests passed!\n";
     return 0;

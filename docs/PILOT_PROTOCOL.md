@@ -7,7 +7,7 @@ The pilot protocol is a line-delimited JSON protocol for agent-to-agent communic
 ## Transport
 
 ### TCP Line Protocol
-- **Default binding**: `0.0.0.0:<port>` (all interfaces, configurable via `--agent-port`)
+- **Default binding**: `127.0.0.1:<port>` (loopback only, configurable via `--agent-port`)
 - **Format**: One JSON request per line (`\n` delimited), one JSON response per line
 - **Encoding**: UTF-8
 - **Max line length**: 4096 bytes

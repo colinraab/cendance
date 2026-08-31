@@ -76,10 +76,9 @@ juce::var McpJsonHelpers::makeTextContent (const juce::String& text)
     return juce::var(obj);
 }
 
-juce::var McpJsonHelpers::makeToolError (const juce::String& msg, const juce::var& id)
+juce::var McpJsonHelpers::makeToolError (const juce::String& msg, const juce::var&)
 {
     // MCP spec: tools/call errors use result with isError flag
-    auto* obj = new juce::DynamicObject();
     juce::Array<juce::var> arr;
     auto* errItem = new juce::DynamicObject();
     errItem->setProperty ("type", "text");

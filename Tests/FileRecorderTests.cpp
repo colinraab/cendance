@@ -142,10 +142,12 @@ void testRecordedContentMatchesPushed() {
     const float* chPtrs[1] = {mono};
     bus.push(chPtrs, 240);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    // Stop immediately. The recorder must drain every frame that the capture
+    // bus accepted before it closes the file.
     recorder.stop();
 
     auto status = recorder.getStatus();
+    assert(status.totalSamplesWritten == 240);
 
     // Verify file exists if data was written
     if (std::filesystem::exists(info.filePath)) {

@@ -1,4 +1,5 @@
 #include "P2PDownloadRegistry.h"
+#include "../Config/AppDirectories.h"
 
 #include <juce_core/juce_core.h>
 
@@ -27,9 +28,7 @@ const P2PDownloadEntry* P2PDownloadRegistry::findEntry(const std::string& preset
 }
 
 juce::File P2PDownloadRegistry::registryFilePath() const {
-    return juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory)
-        .getChildFile(juce::String("cendance"))
-        .getChildFile(juce::String("p2p_downloads.json"));
+    return AppDirectories::dataDirectory().getChildFile("p2p_downloads.json");
 }
 
 bool P2PDownloadRegistry::save() const {

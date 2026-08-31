@@ -1,4 +1,5 @@
 #include "ToSGuard.h"
+#include "AppDirectories.h"
 
 #include <cstdlib>
 #include <fstream>
@@ -8,7 +9,6 @@ namespace ToSGuard {
 namespace {
 
 constexpr const char* kConfigFileName = "config.json";
-constexpr const char* kConfigDirName = "cendance";
 
 bool ensureConfigDirectory() {
     auto dir = configDirectory();
@@ -46,8 +46,7 @@ juce::File configDirectory() {
         return juce::File(juce::String(overrideDir));
     }
 
-    return juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory)
-        .getChildFile(juce::String(kConfigDirName));
+    return AppDirectories::dataDirectory();
 }
 
 juce::File configFile() {

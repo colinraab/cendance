@@ -192,6 +192,7 @@ void testEmptyRegistrySaveLoad() {
 }
 
 int main() {
+    isolateAppDataForTests();
     std::cout << "=== Download Registry Integration Tests ===\n\n";
 
     testAddSaveLoadRoundTrip();

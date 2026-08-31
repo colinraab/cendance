@@ -162,10 +162,12 @@ void FileRecorder::writerThreadFunc() {
     // Pre-allocate temp buffer for reading from ring buffer (interleaved)
     std::vector<float> interleaved(static_cast<size_t>(chunkSize * numChannels));
 
-    while (!stopRequested_.load(std::memory_order_acquire)) {
+    for (;;) {
         int framesRead = bus_->pop(interleaved.data(), chunkSize);
 
         if (framesRead <= 0) {
+            if (stopRequested_.load(std::memory_order_acquire))
+                break;
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
             continue;
         }

@@ -608,6 +608,7 @@ void testConcurrentPublishes() {
 }
 
 int main() {
+    isolateAppDataForTests();
     std::cout << "=== P2P Round-Trip Integration Tests ===\n\n";
 
     testPresetRoundTrip();

@@ -48,6 +48,70 @@ int main(int argc, char* argv[])
     juce.start();
     stdoutRedirect.restore();
 
+    const auto toJuceString = [](const std::string& value) {
+        return juce::String::fromUTF8(value.data(), static_cast<int>(value.size()));
+    };
+    const auto makeControlResponse = [&toJuceString](bool ok, const std::string& message) {
+        auto* response = new juce::DynamicObject();
+        response->setProperty("ok", ok);
+        response->setProperty("message", toJuceString(message));
+        return juce::JSON::toString(juce::var(response), false).toStdString();
+    };
+
+    const auto recordingControl = [&juce, &toJuceString, &makeControlResponse]
+                                  (const std::string& action,
+                                   const std::string& argsJson) -> std::string {
+        if (action == "start") {
+            const auto parsed = juce::JSON::parse(toJuceString(argsJson));
+            if (!parsed.isObject() || !parsed.hasProperty("path"))
+                return makeControlResponse(false, "Recording path is required");
+
+            const std::string path = parsed["path"].toString().toStdString();
+            const std::string formatName = parsed.hasProperty("format")
+                ? parsed["format"].toString().toStdString()
+                : "wav:f32";
+            if (path.empty())
+                return makeControlResponse(false, "Recording path is required");
+
+            cendance::FileRecorder::Format format;
+            if (formatName == "wav:f32")
+                format = cendance::FileRecorder::Format::WavF32;
+            else if (formatName == "wav:s16")
+                format = cendance::FileRecorder::Format::WavS16;
+            else if (formatName == "flac:24")
+                format = cendance::FileRecorder::Format::Flac24;
+            else if (formatName == "flac:16")
+                format = cendance::FileRecorder::Format::Flac16;
+            else
+                return makeControlResponse(false, "Unsupported recording format: " + formatName);
+
+            if (juce.startRecording(path, format))
+                return makeControlResponse(true, "Recording started: " + path);
+            return makeControlResponse(false, "Failed to start recording: " + path);
+        }
+
+        if (action == "stop") {
+            juce.stopRecording();
+            return makeControlResponse(true, "Recording stopped");
+        }
+
+        if (action == "status") {
+            const auto status = juce.getRecordingStatus();
+            auto* response = new juce::DynamicObject();
+            response->setProperty("ok", true);
+            response->setProperty("recording", status.recording);
+            response->setProperty("duration", status.durationSeconds);
+            response->setProperty("overrun", status.overrun);
+            response->setProperty("path", toJuceString(status.filePath));
+            response->setProperty("samplesWritten", static_cast<int64_t>(status.totalSamplesWritten));
+            response->setProperty("samplesDropped", static_cast<int64_t>(status.totalSamplesDropped));
+            response->setProperty("error", toJuceString(status.lastError));
+            return juce::JSON::toString(juce::var(response), false).toStdString();
+        }
+
+        return makeControlResponse(false, "Unknown recording action: " + action);
+    };
+
     // Start recording if --record was specified
     if (!cli.options.recordPath.empty()) {
         cendance::FileRecorder::Format format = cendance::FileRecorder::Format::WavF32;
@@ -59,32 +123,11 @@ int main(int argc, char* argv[])
             format = cendance::FileRecorder::Format::Flac16;
 
         if (juce.startRecording(cli.options.recordPath, format)) {
-            std::cout << "Recording to: " << cli.options.recordPath
-                      << " (format: " << cli.options.recordFormat << ")" << std::endl;
+            std::ostream& statusOutput = cli.options.mcpMode ? std::cerr : std::cout;
+            statusOutput << "Recording to: " << cli.options.recordPath
+                         << " (format: " << cli.options.recordFormat << ")" << std::endl;
         } else {
             std::cerr << "Failed to start recording to: " << cli.options.recordPath << std::endl;
-        }
-    }
-
-    // Start streaming if --audio-stream was specified
-    if (!cli.options.audioStreamTarget.empty()) {
-        cendance::StreamSink::Format streamFmt = cendance::StreamSink::Format::F32LE;
-        if (cli.options.audioStreamFormat == "s16le")
-            streamFmt = cendance::StreamSink::Format::S16LE;
-
-        std::string streamTarget = cli.options.audioStreamTarget;
-        if (juce.startStreaming(
-                [streamTarget](const void* data, size_t bytes) -> bool {
-                    if (streamTarget == "stdout") {
-                        return fwrite(data, 1, bytes, stdout) == bytes;
-                    }
-                    // TODO: TCP socket support
-                    return false;
-                }, streamFmt)) {
-            std::cout << "Streaming to: " << cli.options.audioStreamTarget
-                      << " (format: " << cli.options.audioStreamFormat << ")" << std::endl;
-        } else {
-            std::cerr << "Failed to start streaming to: " << cli.options.audioStreamTarget << std::endl;
         }
     }
 
@@ -102,9 +145,11 @@ int main(int argc, char* argv[])
         P2PToolHandler p2pHandler(runtime.appState, securityManager, presetSerializer, p2pClient);
         McpModeContext mcpContext{
             runtime.appState, runtime.commandQueue, runtime.meterQueue,
-            runtime.contributionLibrary, p2pHandler
+            runtime.contributionLibrary, p2pHandler, recordingControl
         };
         int result = runMcpMode(mcpContext);
+        juce.stopStreaming();
+        juce.stopRecording();
         juce.stop();
         return result;
     }
@@ -153,78 +198,8 @@ int main(int argc, char* argv[])
                startup.status.message,
                startup.status.isError,
                cli.options.agentPort,
-               // Recording callback
-               [&juce](const std::string& action, const std::string& argsJson) -> std::string {
-                   if (action == "start") {
-                       // Parse args: expect "path" and optionally "format"
-                       juce::var parsed;
-                       try { parsed = juce::JSON::parse(juce::String(argsJson)); } catch (...) {}
-                       std::string path = "output.wav";
-                       std::string fmt = "wav:f32";
-                       if (parsed.isObject()) {
-                           if (parsed.hasProperty("path")) path = parsed["path"].toString().toStdString();
-                           if (parsed.hasProperty("format")) fmt = parsed["format"].toString().toStdString();
-                       }
-                       cendance::FileRecorder::Format format = cendance::FileRecorder::Format::WavF32;
-                       if (fmt == "wav:s16") format = cendance::FileRecorder::Format::WavS16;
-                       else if (fmt == "flac:24") format = cendance::FileRecorder::Format::Flac24;
-                       else if (fmt == "flac:16") format = cendance::FileRecorder::Format::Flac16;
-                       if (juce.startRecording(path, format))
-                           return "{\"ok\":true,\"message\":\"Recording started: " + path + "\"}";
-                       return "{\"ok\":false,\"message\":\"Failed to start recording\"}";
-                   } else if (action == "stop") {
-                       juce.stopRecording();
-                       return "{\"ok\":true,\"message\":\"Recording stopped\"}";
-                   } else if (action == "status") {
-                       auto st = juce.getRecordingStatus();
-                       auto* res = new juce::DynamicObject();
-                       res->setProperty("ok", true);
-                       res->setProperty("recording", st.recording);
-                       res->setProperty("duration", st.durationSeconds);
-                       res->setProperty("overrun", st.overrun);
-                       res->setProperty("path", juce::String(st.filePath));
-                       res->setProperty("samplesWritten", static_cast<int64_t>(st.totalSamplesWritten));
-                       res->setProperty("samplesDropped", static_cast<int64_t>(st.totalSamplesDropped));
-                       return juce::JSON::toString(juce::var(res), false).toStdString();
-                   }
-                   return "{\"ok\":false,\"message\":\"Unknown recording action: " + action + "\"}";
-               },
-               // Streaming callback
-               [&juce](const std::string& action, const std::string& argsJson) -> std::string {
-                   if (action == "start") {
-                       juce::var parsed;
-                       try { parsed = juce::JSON::parse(juce::String(argsJson)); } catch (...) {}
-                       std::string target = "stdout";
-                       std::string fmt = "f32le";
-                       if (parsed.isObject()) {
-                           if (parsed.hasProperty("target")) target = parsed["target"].toString().toStdString();
-                           if (parsed.hasProperty("format")) fmt = parsed["format"].toString().toStdString();
-                       }
-                       cendance::StreamSink::Format format = cendance::StreamSink::Format::F32LE;
-                       if (fmt == "s16le") format = cendance::StreamSink::Format::S16LE;
-                       if (juce.startStreaming(
-                               [target](const void* data, size_t bytes) -> bool {
-                                   if (target == "stdout") return fwrite(data, 1, bytes, stdout) == bytes;
-                                   return false;
-                               }, format))
-                           return "{\"ok\":true,\"message\":\"Streaming started: " + target + "\"}";
-                       return "{\"ok\":false,\"message\":\"Failed to start streaming\"}";
-                   } else if (action == "stop") {
-                       juce.stopStreaming();
-                       return "{\"ok\":true,\"message\":\"Streaming stopped\"}";
-                   } else if (action == "status") {
-                       auto st = juce.getStreamingStatus();
-                       auto* res = new juce::DynamicObject();
-                       res->setProperty("ok", true);
-                       res->setProperty("streaming", st.streaming);
-                       res->setProperty("duration", st.durationSeconds);
-                       res->setProperty("overrun", st.overrun);
-                       res->setProperty("samplesWritten", static_cast<int64_t>(st.totalSamplesWritten));
-                       res->setProperty("samplesDropped", static_cast<int64_t>(st.totalSamplesDropped));
-                       return juce::JSON::toString(juce::var(res), false).toStdString();
-                   }
-                   return "{\"ok\":false,\"message\":\"Unknown streaming action: " + action + "\"}";
-               });
+               recordingControl,
+               nullptr);
     app.run();
 
     if (cli.options.saveOnExit) {

@@ -1,14 +1,30 @@
 cmake_minimum_required(VERSION 3.24)
+
+if(APPLE AND "${CMAKE_OSX_DEPLOYMENT_TARGET}" STREQUAL "")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "13.0" CACHE STRING
+        "Requested minimum macOS deployment version" FORCE)
+endif()
+
 project(cendance VERSION 0.1.0 LANGUAGES CXX)
 
-enable_testing()
+include(CTest)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_path(SODIUM_INCLUDE_DIR sodium.h)
+if(APPLE)
+    # Prefer the static archive so developer packages do not depend on a
+    # Homebrew-specific dylib path at runtime.
+    set(_cendance_library_suffixes ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .a .dylib)
+endif()
 find_library(SODIUM_LIBRARY sodium)
+if(APPLE)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ${_cendance_library_suffixes})
+    unset(_cendance_library_suffixes)
+endif()
 
 if(NOT SODIUM_INCLUDE_DIR OR NOT SODIUM_LIBRARY)
     message(FATAL_ERROR "libsodium is required for P2P preset signing. Install it with your platform package manager, e.g. brew install libsodium.")
@@ -39,7 +55,7 @@ if(APPLE AND NOT DEFINED CENDANCE_SKIP_CLT_WORKAROUND)
 endif()
 
 # JUCE as submodule
-add_subdirectory(JUCE)
+add_subdirectory(JUCE EXCLUDE_FROM_ALL)
 
 file(GLOB_RECURSE CENDANCE_DRUMKIT_OGG_FILES CONFIGURE_DEPENDS
     "Resources/DrumKits/*.ogg"
@@ -98,10 +114,12 @@ juce_add_binary_data(cendance_mcp_resources
 
 # FTXUI via FetchContent
 include(FetchContent)
+set(FTXUI_ENABLE_INSTALL OFF CACHE BOOL "Do not install the private FTXUI dependency" FORCE)
 FetchContent_Declare(
     ftxui
     GIT_REPOSITORY https://github.com/ArthurSonzogni/FTXUI.git
-    GIT_TAG v6.1.9
+    GIT_TAG 5cfed50702f52d51c1b189b5f97f8beaf5eaa2a6 # v6.1.9
+    GIT_SHALLOW FALSE
 )
 FetchContent_MakeAvailable(ftxui)
 
@@ -243,14 +261,9 @@ target_sources(cendance PRIVATE
     Source/UI/Components/KeyEntryModal.cpp
     Source/UI/Components/ProjectPathModal.cpp
     Source/UI/Components/SpectrumView.cpp
-    Source/Config/ToSGuard.cpp
     Source/Security/ContentHeader.cpp
     Source/Security/SecurityManager.cpp
     Source/Security/PresetSerializer.cpp
-    Source/App/CustomAlgorithmPreset.cpp
-    Source/App/AlgorithmPresetRegistry.cpp
-    Source/App/GenreCatalog.cpp
-    Source/Audio/Generators/CustomAlgorithmInstance.cpp
     Source/Network/P2PClient.cpp
     Source/Network/P2PDownloadRegistry.cpp
     Source/Network/PeerDiscovery.cpp
@@ -295,6 +308,22 @@ add_custom_command(TARGET cendance POST_BUILD
         "$<TARGET_FILE_DIR:cendance>/../cendance"
 )
 
+install(TARGETS cendance RUNTIME DESTINATION bin)
+install(FILES
+    LICENSE
+    THIRD_PARTY_NOTICES.md
+    DESTINATION share/doc/cendance
+)
+install(FILES Resources/LICENSE.md
+    DESTINATION share/doc/cendance
+    RENAME AUDIO_LICENSE.md
+)
+install(FILES Resources/IRs/README.md
+    DESTINATION share/doc/cendance
+    RENAME IMPULSE_RESPONSE_PROVENANCE.md
+)
+
+if(BUILD_TESTING)
 # Phase 2 Verification tests
 add_executable(cendance_tests Tests/QueueTests.cpp)
 set_target_properties(cendance_tests PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
@@ -639,6 +668,16 @@ target_link_libraries(cendance_file_recorder_tests PRIVATE
 set_target_properties(cendance_file_recorder_tests PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
 add_test(NAME cendance_file_recorder_tests COMMAND cendance_file_recorder_tests)
 
+add_executable(cendance_cli_options_tests
+    Tests/CliOptionsTests.cpp
+    Source/App/CliOptions.cpp
+)
+set_target_properties(cendance_cli_options_tests PROPERTIES
+    CXX_STANDARD 20
+    CXX_STANDARD_REQUIRED ON
+)
+add_test(NAME cendance_cli_options_tests COMMAND cendance_cli_options_tests)
+
 # ========================================================================
 # Integration Test Executables
 # ========================================================================
@@ -796,3 +835,28 @@ target_include_directories(cendance_agent_command_p2p_integration_tests PRIVATE 
 set_target_properties(cendance_agent_command_p2p_integration_tests PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
 add_test(NAME cendance_agent_command_p2p_integration_tests COMMAND cendance_agent_command_p2p_integration_tests)
 set_tests_properties(cendance_agent_command_p2p_integration_tests PROPERTIES TIMEOUT 60)
+
+# The test suite currently uses standard assert() checks. Keep them enabled in
+# optimized configurations so a Release test run exercises the same checks as
+# Debug rather than compiling them out via NDEBUG.
+get_property(_cendance_targets DIRECTORY PROPERTY BUILDSYSTEM_TARGETS)
+foreach(_target IN LISTS _cendance_targets)
+    if(_target MATCHES "^cendance(_.*)?_tests$")
+        if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+            target_compile_options(${_target} PRIVATE -UNDEBUG)
+        elseif(MSVC)
+            target_compile_options(${_target} PRIVATE /UNDEBUG)
+        endif()
+    endif()
+endforeach()
+endif()
+
+set(CPACK_PACKAGE_NAME "cendance")
+set(CPACK_PACKAGE_VENDOR "cendance contributors")
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Terminal-first generative music workstation")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set(CPACK_PACKAGE_FILE_NAME
+    "cendance-${PROJECT_VERSION}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}")
+set(CPACK_GENERATOR "TGZ")
+include(CPack)

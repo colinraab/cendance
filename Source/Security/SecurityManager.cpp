@@ -1,4 +1,5 @@
 #include "SecurityManager.h"
+#include "../Config/AppDirectories.h"
 
 #include <juce_core/juce_core.h>
 
@@ -121,9 +122,7 @@ std::vector<uint8_t> SecurityManager::fromHex(const std::string& hex) {
 }
 
 juce::File SecurityManager::keyFilePath() const {
-    return juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory)
-        .getChildFile(juce::String("cendance"))
-        .getChildFile(juce::String("identity.json"));
+    return AppDirectories::dataDirectory().getChildFile("identity.json");
 }
 
 bool SecurityManager::loadOrGenerateKeypair() {

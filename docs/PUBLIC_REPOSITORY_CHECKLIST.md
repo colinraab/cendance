@@ -47,6 +47,16 @@ empty directories, and any `.DS_Store` files inside them are ignored.
       directory.
 - [x] Configure, build, and run the full test suite from that clean clone.
 - [x] Review the complete initial commit on GitHub before changing visibility.
+- [x] Add macOS 15 arm64 Debug and Intel Release CI definitions.
+- [x] Add dependency-update automation for GitHub Actions and the JUCE
+      submodule.
+- [x] Add contributing, security, and community conduct policies.
+- [x] Add a CPack archive containing the executable and required notices.
+- [ ] Confirm both macOS CI jobs pass on GitHub.
+- [ ] Enable private vulnerability reporting and branch protection.
+- [ ] Publish a preview archive and its SHA-256 checksum.
+- [ ] Sign and notarize the polished macOS release, or label the first archive
+      clearly as an unsigned developer preview.
 
 ## History and identity
 

@@ -19,7 +19,8 @@ Windows porting and packaging checklist.
 - Kit: `Clang 21.0.0 arm64-apple-darwin25.4.0`
 - Generator: `Ninja`
 - Build type: `Debug`
-- If switching generators (e.g. Makefiles -> Ninja), clear stale caches with `rm -rf build` before reconfigure.
+- If switching generators (for example, Makefiles to Ninja), move the stale
+  build directory to the Trash before reconfiguring.
 
 ### Quick VS Code commands
 
@@ -48,6 +49,9 @@ Windows porting and packaging checklist.
 /opt/homebrew/bin/cmake --build build-release
 ctest --test-dir build-release --output-on-failure
 
+# Create cendance-0.1.0-<system>-<architecture>.tar.gz
+/opt/homebrew/bin/cmake --build build-release --target package
+
 # Release executable
 ./build-release/cendance_artefacts/cendance --help
 ```
@@ -64,9 +68,10 @@ ctest --test-dir build-release --output-on-failure
 
 ## Clean Rebuild
 
+Move `build/` to the Trash in Finder, then run:
+
 ```bash
-rm -rf build
-/opt/homebrew/bin/cmake -B build
+/opt/homebrew/bin/cmake -B build -G Ninja
 /opt/homebrew/bin/cmake --build build
 ```
 
@@ -87,15 +92,11 @@ ships all C++ stdlib headers inside the SDK at
 `<SDK>/usr/include/c++/v1/`. The stale toolchain directory makes clang
 think it has its own C++ headers, so it never searches the SDK.
 
-**Permanent fix (recommended):**
-```bash
-sudo rm -rf /Library/Developer/CommandLineTools/usr/include/c++/v1
-```
-This removes only the 3 stale files. The real C++ headers remain safely in the SDK.
-
-**Alternative:** The project's `CMakeLists.txt` includes an automatic workaround
+The project's `CMakeLists.txt` includes an automatic workaround
 that detects this condition and passes `-nostdinc++ -isystem <SDK>/usr/include/c++/v1`
-to the compiler. This runs automatically — no manual intervention needed.
+to the compiler. This runs automatically, so no destructive toolchain cleanup
+is required. Reinstall Apple's Command Line Tools if you want to repair the
+system installation itself.
 
 ### `cmake: command not found`
 
@@ -130,5 +131,6 @@ cendance/
 
 | Dependency | Version | How |
 |-----------|---------|-----|
-| JUCE | latest (git submodule) | `git submodule update --init` |
-| FTXUI | v6.1.9 | Auto-fetched by CMake via `FetchContent` |
+| JUCE | pinned submodule commit | `git submodule update --init --recursive` |
+| FTXUI | v6.1.9, pinned commit | Auto-fetched by CMake via `FetchContent` |
+| libsodium | 1.0.18 or newer | System package; statically linked on macOS when available |
