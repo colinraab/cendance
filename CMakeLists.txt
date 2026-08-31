@@ -549,7 +549,9 @@ target_compile_definitions(cendance_audio_integration_tests PRIVATE
     JUCE_USE_OGGVORBIS=1
 )
 add_test(NAME cendance_audio_integration_tests COMMAND cendance_audio_integration_tests)
-set_tests_properties(cendance_audio_integration_tests PROPERTIES TIMEOUT 120)
+# This test renders every sound preset across a ten-second measurement window.
+# Clean GitHub-hosted macOS runners can need a little over two minutes.
+set_tests_properties(cendance_audio_integration_tests PROPERTIES TIMEOUT 300)
 
 add_executable(cendance_convolution_reverb_tests
     Tests/ConvolutionReverbTests.cpp
