@@ -5,15 +5,50 @@ It uses JUCE for audio/DSP and FTXUI for the keyboard-driven interface.
 
 ## Status
 
-- macOS is the primary path today. CI validates macOS 15 on both Apple Silicon
-  and Intel; CMake targets macOS 13 by default, but macOS 13–14 runtime
-  compatibility is not yet release-validated.
-- The v0.1.0 release is planned as an unsigned macOS developer preview;
-  Gatekeeper may warn because Developer ID signing and notarization are not yet
-  configured.
+- macOS is the primary path today. The v0.1.0 binaries target macOS 15 and CI
+  validates them on both Apple silicon and Intel. Source builds target macOS 13
+  by default, but macOS 13–14 runtime compatibility is not release-validated.
+- [v0.1.0](https://github.com/colinraab/cendance/releases/tag/v0.1.0) is
+  available as an unsigned macOS developer preview. It is not signed with an
+  Apple Developer ID or notarized, so Gatekeeper may block the first launch.
 - Windows is not release-ready yet.
 
-## Quick Start
+## Download and Run v0.1.0
+
+Download the archive and matching `.sha256` file for your Mac from the
+[v0.1.0 release](https://github.com/colinraab/cendance/releases/tag/v0.1.0).
+The preview requires macOS 15. Use `arm64` for Apple silicon or `x86_64` for an
+Intel Mac.
+
+Verify the download before extracting and running it. For Apple silicon:
+
+```bash
+cd ~/Downloads
+shasum -a 256 -c cendance-0.1.0-Darwin-arm64.tar.gz.sha256
+tar -xzf cendance-0.1.0-Darwin-arm64.tar.gz
+cd cendance-0.1.0-Darwin-arm64
+./bin/cendance
+```
+
+For an Intel Mac, replace `arm64` with `x86_64` in those commands.
+
+If macOS blocks the first launch, do not disable Gatekeeper globally. After
+the checksum passes, open **System Settings > Privacy & Security**, scroll to
+**Security**, select **Open Anyway** for `cendance`, and confirm. Then run
+`./bin/cendance` again.
+
+As a terminal-only alternative, remove the quarantine attribute from only the
+verified executable, then run it:
+
+```bash
+xattr -d com.apple.quarantine bin/cendance
+./bin/cendance
+```
+
+See [INSTALL.md](INSTALL.md) for detailed installation, Gatekeeper, and MCP
+configuration instructions.
+
+## Build From Source
 
 ```bash
 git clone --recurse-submodules https://github.com/colinraab/cendance.git
@@ -77,11 +112,13 @@ original drum and melodic samples are dedicated under
 responses retain their respective licenses; see
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the resource notices.
 
-## Release Checklist
+## Remaining Release Work
 
 Before inviting broad public use:
 
-1. Confirm the macOS arm64 and Intel Release CI jobs pass on GitHub.
-2. Publish the CI-built macOS archives with SHA-256 checksums.
-3. Add Apple Developer ID signing and notarization for the polished macOS release.
-4. Complete the Windows portability checklist before advertising Windows support.
+1. Enable GitHub private vulnerability reporting after the repository becomes
+   public.
+2. Add Apple Developer ID signing and notarization for a polished macOS
+   release.
+3. Complete the Windows portability checklist before advertising Windows
+   support.

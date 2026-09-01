@@ -1,6 +1,6 @@
 # Public Repository Checklist
 
-Use this checklist to create the private cendance repository and decide when it
+Use this checklist to track the private cendance repository and decide when it
 is ready to become public.
 
 ## Curated snapshot
@@ -53,10 +53,17 @@ empty directories, and any `.DS_Store` files inside them are ignored.
       submodule.
 - [x] Add contributing, security, and community conduct policies.
 - [x] Add a CPack archive containing the executable and required notices.
-- [ ] Confirm both macOS CI jobs pass on GitHub.
-- [ ] Enable private vulnerability reporting and branch protection.
-- [ ] Publish a preview archive and its SHA-256 checksum.
+- [x] Confirm both macOS 15 CI jobs pass all 22 tests on GitHub.
+- [x] Protect `main` with required CI, review, conversation-resolution, and
+      linear-history rules.
+- [x] Enable dependency vulnerability alerts and automated security fixes.
+- [ ] Enable private vulnerability reporting after making the repository
+      public. GitHub does not offer this setting while the repository is
+      private.
+- [x] Publish arm64 and x86_64 preview archives with SHA-256 checksum files.
 - [x] Label the first archive clearly as an unsigned developer preview.
+- [x] Document checksum verification, Gatekeeper's per-application exception,
+      and the exact archive layout.
 - [ ] Sign and notarize a polished macOS release.
 
 ## History and identity

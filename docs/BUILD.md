@@ -16,7 +16,7 @@ Windows porting and packaging checklist.
 
 ## VS Code CMake Tools defaults (recommended)
 
-- Kit: `Clang 21.0.0 arm64-apple-darwin25.4.0`
+- Kit: the Apple Clang compiler detected for your Mac
 - Generator: `Ninja`
 - Build type: `Debug`
 - If switching generators (for example, Makefiles to Ninja), move the stale
@@ -24,7 +24,7 @@ Windows porting and packaging checklist.
 
 ### Quick VS Code commands
 
-- `CMake: Select a Kit` -> choose `Clang 21.0.0 arm64-apple-darwin25.4.0`
+- `CMake: Select a Kit` -> choose the detected Apple Clang kit for your Mac
 - `CMake: Select Variant` -> choose `Debug`
 - `CMake: Delete Cache and Reconfigure`
 - `CMake: Build`
@@ -33,10 +33,10 @@ Windows porting and packaging checklist.
 
 ```bash
 # Configure (first time fetches FTXUI and builds juceaide)
-/opt/homebrew/bin/cmake -B build -G Ninja
+cmake -B build -G Ninja
 
 # Build
-/opt/homebrew/bin/cmake --build build
+cmake --build build
 
 # Run
 ./build/cendance_artefacts/cendance
@@ -45,12 +45,12 @@ Windows porting and packaging checklist.
 ## Release Build
 
 ```bash
-/opt/homebrew/bin/cmake -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release
-/opt/homebrew/bin/cmake --build build-release
+cmake -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build-release
 ctest --test-dir build-release --output-on-failure
 
 # Create cendance-0.1.0-<system>-<architecture>.tar.gz
-/opt/homebrew/bin/cmake --build build-release --target package
+cmake --build build-release --target package
 
 # Release executable
 ./build-release/cendance_artefacts/cendance --help
@@ -71,8 +71,8 @@ ctest --test-dir build-release --output-on-failure
 Move `build/` to the Trash in Finder, then run:
 
 ```bash
-/opt/homebrew/bin/cmake -B build -G Ninja
-/opt/homebrew/bin/cmake --build build
+cmake -B build -G Ninja
+cmake --build build
 ```
 
 ## Troubleshooting
@@ -100,13 +100,19 @@ system installation itself.
 
 ### `cmake: command not found`
 
-CMake is installed via Homebrew at `/opt/homebrew/bin/cmake`. If your shell
-can't find it, ensure Homebrew's bin is in your PATH:
+Install CMake with `brew install cmake`. If Homebrew is installed but your
+shell cannot find its commands, follow the `brew shellenv` instruction printed
+by the Homebrew installer. The common setup commands are:
 
 ```bash
+# Apple silicon
 echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
-source ~/.zprofile
+
+# Intel
+echo 'eval "$(/usr/local/bin/brew shellenv)"' >> ~/.zprofile
 ```
+
+Run only the command for your Mac, then open a new terminal.
 
 ### `runDispatchLoopUntil` error
 

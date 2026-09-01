@@ -4,33 +4,42 @@ Last reviewed: 2026-08-31
 
 ## Current State
 
-cendance is close to an early public macOS release, but it is not yet packaged
-as a consumer-ready download.
+cendance has an early macOS developer preview, but it is not yet packaged as a
+signed, notarized consumer release.
 
 - App target: terminal-first JUCE + FTXUI executable, not a `.app` bundle.
-- Primary platform: macOS. CI validates macOS 15 on arm64 and x86_64. CMake
-  targets macOS 13 by default, but macOS 13–14 runtime compatibility is not yet
-  release-validated.
+- Primary platform: macOS. The v0.1.0 binaries target macOS 15, and CI validates
+  them on arm64 and x86_64. Source builds target macOS 13 by default, but macOS
+  13–14 runtime compatibility is not release-validated.
 - Build system: CMake + JUCE submodule + FTXUI FetchContent + libsodium.
 - Tests: 22 CTest targets, with assertions kept active in Release builds.
 - MCP: built into the same binary; launch with `cendance --mcp`.
 - Packaging: CPack creates a `.tar.gz` containing the executable, software
-  license, audio license, IR provenance, and third-party notices.
+  license, audio license, IR provenance, and third-party notices. The v0.1.0
+  GitHub prerelease publishes arm64 and x86_64 archives with matching SHA-256
+  files.
 - Windows: not release-ready. Some code paths are still POSIX-only and the
   localhost agent protocol reports "not implemented on Windows yet."
 
-## Publish Blockers
+## Remaining Release Work
 
-Address these before inviting broad external users:
+Completed for the v0.1.0 developer preview:
 
-1. Confirm the macOS arm64 and x86_64 Release jobs pass in GitHub Actions.
-2. Publish the first release as an explicitly unsigned developer preview.
-3. Publish SHA-256 checksums for every preview artifact.
-4. Decide whether CPack tarballs remain acceptable or whether the first polished
-   macOS artifact should be a signed `.pkg` installer.
-5. Enable GitHub private vulnerability reporting and recommended branch
-   protections before making the repository public.
-6. Do a Windows portability pass before advertising Windows support.
+- Both macOS 15 Release jobs pass with all 22 tests on arm64 and x86_64.
+- The v0.1.0 prerelease is explicitly labeled as unsigned.
+- Both release archives have matching SHA-256 files.
+- `main` requires both CI jobs, one approving review, resolved conversations,
+  and linear history. Force pushes and branch deletion are disabled.
+- Dependency vulnerability alerts and automated security fixes are enabled.
+
+Remaining work:
+
+1. Enable GitHub private vulnerability reporting immediately after making the
+   repository public. GitHub does not expose that setting for a private
+   repository.
+2. Decide whether preview tarballs remain acceptable or whether the first
+   polished macOS artifact should be a signed `.pkg` installer.
+3. Do a Windows portability pass before advertising Windows support.
 
 ## macOS Distribution
 
@@ -123,29 +132,37 @@ the entitlements required by a concrete notarization or runtime failure.
 ### macOS Continuous Integration
 
 `.github/workflows/ci.yml` builds, tests, and packages Release on macOS 15 arm64
-and Intel. Both archives are retained as short-lived workflow artifacts. Keep
-polished release publishing separate from pull-request CI: a tag-triggered
-release workflow should sign, notarize, checksum, and upload only after both
-build jobs pass.
+and Intel. Both archives are retained as short-lived workflow artifacts. The
+v0.1.0 prerelease was published from a successful two-architecture run and its
+uploaded assets were downloaded and checksum-verified after publication. Keep
+polished release publishing separate from pull-request CI: a future
+tag-triggered workflow should sign, notarize, checksum, and upload only after
+both build jobs pass.
 
 ## Homebrew
 
-A separate tap is a good early macOS distribution channel after the first
-GitHub Release exists.
+A separate tap is a possible early macOS distribution channel. This example is
+not published or installation-tested yet:
 
 ```ruby
 class Cendance < Formula
   desc "Terminal generative music app with an embedded MCP server"
   homepage "https://github.com/colinraab/cendance"
-  url "https://github.com/colinraab/cendance/releases/download/v0.1.0/cendance-0.1.0-Darwin-arm64.tar.gz"
-  sha256 "REPLACE_WITH_SHA256"
   version "0.1.0"
   license "AGPL-3.0-only"
 
-  depends_on "libsodium"
+  on_arm do
+    url "https://github.com/colinraab/cendance/releases/download/v0.1.0/cendance-0.1.0-Darwin-arm64.tar.gz"
+    sha256 "74616179800f811fcf776596c367f21eaf15198439cfd3f2d1b5a3b1ebc77d11"
+  end
+
+  on_intel do
+    url "https://github.com/colinraab/cendance/releases/download/v0.1.0/cendance-0.1.0-Darwin-x86_64.tar.gz"
+    sha256 "09480b0e344b8533d776bb5b999463d3cdfe0d6ad190f16baf894567890e0b11"
+  end
 
   def install
-    bin.install "cendance"
+    bin.install "bin/cendance"
   end
 
   test do
@@ -225,14 +242,15 @@ After Homebrew install:
 }
 ```
 
-## Recommended Release Order
+## Recommended Next Steps
 
-1. Confirm macOS arm64 and Intel CI pass on GitHub.
-2. Enable private vulnerability reporting and branch protection.
-3. Publish CPack preview tarballs with SHA-256 checksums.
+1. Make the repository public when its contents and v0.1.0 prerelease are ready
+   for external access.
+2. Enable GitHub private vulnerability reporting immediately afterward.
+3. Invite a small group of macOS 15 users to test the unsigned preview and its
+   install instructions.
 4. Enroll in the Apple Developer Program.
 5. Add Developer ID signing and notarized `.pkg` generation.
-6. Create a Homebrew tap.
-7. Invite the first external macOS users.
-8. Port Windows runtime gaps and add Windows CI.
-9. Package Windows via Store/MSIX or a signed installer.
+6. Test and publish a Homebrew tap if it remains useful.
+7. Port Windows runtime gaps and add Windows CI.
+8. Package Windows through Store/MSIX or a signed installer.
