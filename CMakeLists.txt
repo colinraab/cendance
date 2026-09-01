@@ -5,7 +5,7 @@ if(APPLE AND "${CMAKE_OSX_DEPLOYMENT_TARGET}" STREQUAL "")
         "Requested minimum macOS deployment version" FORCE)
 endif()
 
-project(cendance VERSION 0.1.0 LANGUAGES C CXX)
+project(cendance VERSION 0.1.1 LANGUAGES C CXX)
 
 include(CTest)
 

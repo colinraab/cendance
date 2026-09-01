@@ -1,22 +1,22 @@
 # cendance
 
 cendance is a terminal-first generative music app with a built-in MCP server.
-It uses JUCE for audio/DSP and FTXUI for the keyboard-driven interface.
+It uses JUCE 9.0.1 for audio/DSP and FTXUI for the keyboard-driven interface.
 
 ## Status
 
-- macOS is the primary path today. The v0.1.0 binaries target macOS 15 and CI
+- macOS is the primary path today. The v0.1.1 binaries target macOS 15 and CI
   validates them on both Apple silicon and Intel. Source builds target macOS 13
   by default, but macOS 13–14 runtime compatibility is not release-validated.
-- [v0.1.0](https://github.com/colinraab/cendance/releases/tag/v0.1.0) is
+- [v0.1.1](https://github.com/colinraab/cendance/releases/tag/v0.1.1) is
   available as an unsigned macOS developer preview. It is not signed with an
   Apple Developer ID or notarized, so Gatekeeper may block the first launch.
 - Windows is not release-ready yet.
 
-## Download and Run v0.1.0
+## Download and Run v0.1.1
 
 Download the archive and matching `.sha256` file for your Mac from the
-[v0.1.0 release](https://github.com/colinraab/cendance/releases/tag/v0.1.0).
+[v0.1.1 release](https://github.com/colinraab/cendance/releases/tag/v0.1.1).
 The preview requires macOS 15. Use `arm64` for Apple silicon or `x86_64` for an
 Intel Mac.
 
@@ -24,9 +24,9 @@ Verify the download before extracting and running it. For Apple silicon:
 
 ```bash
 cd ~/Downloads
-shasum -a 256 -c cendance-0.1.0-Darwin-arm64.tar.gz.sha256
-tar -xzf cendance-0.1.0-Darwin-arm64.tar.gz
-cd cendance-0.1.0-Darwin-arm64
+shasum -a 256 -c cendance-0.1.1-Darwin-arm64.tar.gz.sha256
+tar -xzf cendance-0.1.1-Darwin-arm64.tar.gz
+cd cendance-0.1.1-Darwin-arm64
 ./bin/cendance
 ```
 
@@ -58,7 +58,7 @@ brew install cmake ninja libsodium
 cmake -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build-release
 
-./build-release/cendance_artefacts/cendance
+./build-release/cendance_artefacts/Release/cendance
 ```
 
 Run the test suite:
