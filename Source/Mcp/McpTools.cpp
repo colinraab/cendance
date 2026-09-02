@@ -47,16 +47,15 @@ juce::var McpServer::toolSchemas()
     {"name":"set_master_fx_ref","description":"Set a master FX slot by durable PresetRef from the merged preset catalog.","inputSchema":{"type":"object","required":["ref","slot"],"properties":{"ref":{"type":"string"},"slot":{"type":"integer","minimum":1,"maximum":3}}}},
     {"name":"get_cendance_agent_authoring_guide","description":"Get the end-to-end workflow an agent should follow to make music, discover refs, author packages, install presets, and apply them without source access.","inputSchema":{"type":"object","properties":{}}},
     {"name":"get_cendance_package_schema","description":"Get machine-readable cendance contribution package schema, ref format, effect types, and examples for agent-authored preset packages.","inputSchema":{"type":"object","properties":{"kind":{"type":"string","enum":["effectPresetPack","soundPresetPack","drumKitPresetPack","scenePresetPack","arrangementPresetPack","samplePack"]}}}}
-    ,{"name":"get_tos_status","description":"Get the current Terms of Service acceptance status.","inputSchema":{"type":"object","properties":{}}}
     ,{"name":"save_and_sign_preset","description":"Save the current project state and sign it for P2P sharing. Returns the signed envelope.","inputSchema":{"type":"object","properties":{"state_json":{"type":"string","description":"Optional state JSON to sign. If omitted, uses current app state."}}}}
-    ,{"name":"share_on_network","description":"Share a signed preset envelope on the P2P network.","inputSchema":{"type":"object","required":["preset_json"],"properties":{"preset_json":{"type":"string","description":"The signed envelope JSON to share."}}}}
-    ,{"name":"search_network","description":"Search the P2P network for available presets.","inputSchema":{"type":"object","properties":{}}}
-    ,{"name":"verify_incoming_preset","description":"Verify an incoming preset envelope from the P2P network.","inputSchema":{"type":"object","required":["preset_json"],"properties":{"preset_json":{"type":"string","description":"The signed envelope JSON to verify."}}}}
-    ,{"name":"list_downloaded_presets","description":"List all downloaded presets from the P2P network.","inputSchema":{"type":"object","properties":{}}}
+    ,{"name":"share_on_network","description":"Share a signed preset envelope through the configured sharing backend.","inputSchema":{"type":"object","required":["preset_json"],"properties":{"preset_json":{"type":"string","description":"The signed envelope JSON to share."}}}}
+    ,{"name":"search_network","description":"Search the configured sharing backend for available presets.","inputSchema":{"type":"object","properties":{}}}
+    ,{"name":"verify_incoming_preset","description":"Verify a preset envelope received through a sharing backend.","inputSchema":{"type":"object","required":["preset_json"],"properties":{"preset_json":{"type":"string","description":"The signed envelope JSON to verify."}}}}
+    ,{"name":"list_downloaded_presets","description":"List presets downloaded through a sharing backend.","inputSchema":{"type":"object","properties":{}}}
     ,{"name":"save_and_sign_sample","description":"Read a WAV, FLAC, or OGG file and sign it for P2P sample sharing.","inputSchema":{"type":"object","required":["path"],"properties":{"path":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"},"tags":{"type":"array","items":{"type":"string"}}}}}
-    ,{"name":"share_sample_on_network","description":"Share a signed sample envelope on the P2P network.","inputSchema":{"type":"object","required":["sample_json"],"properties":{"sample_json":{"type":"string"}}}}
-    ,{"name":"search_samples","description":"Search the P2P network for available samples.","inputSchema":{"type":"object","properties":{"query":{"type":"string"},"format":{"type":"string","enum":["wav","flac","ogg"]}}}}
-    ,{"name":"download_sample","description":"Download, verify, and store a sample from the P2P network.","inputSchema":{"type":"object","required":["sample_id"],"properties":{"sample_id":{"type":"string"}}}}
+    ,{"name":"share_sample_on_network","description":"Share a signed sample envelope through the configured sharing backend.","inputSchema":{"type":"object","required":["sample_json"],"properties":{"sample_json":{"type":"string"}}}}
+    ,{"name":"search_samples","description":"Search the configured sharing backend for available samples.","inputSchema":{"type":"object","properties":{"query":{"type":"string"},"format":{"type":"string","enum":["wav","flac","ogg"]}}}}
+    ,{"name":"download_sample","description":"Download, verify, and store a sample from the configured sharing backend.","inputSchema":{"type":"object","required":["sample_id"],"properties":{"sample_id":{"type":"string"}}}}
     ,{"name":"list_downloaded_samples","description":"List downloaded P2P samples.","inputSchema":{"type":"object","properties":{}}}
     ,{"name":"create_custom_sound_preset","description":"Create a signed custom sound preset envelope for one track.","inputSchema":{"type":"object","required":["track"],"properties":{"track":{"type":"integer","minimum":1,"maximum":4},"includeSamples":{"type":"boolean","default":true}}}}
 
@@ -65,7 +64,7 @@ juce::var McpServer::toolSchemas()
     ,{"name":"get_algorithm_pattern","description":"Get the full pattern data for a custom algorithm.","inputSchema":{"type":"object","required":["algorithm_id"],"properties":{"algorithm_id":{"type":"integer","minimum":2048},"track_index":{"type":"integer","minimum":0,"maximum":3}}}}
     ,{"name":"update_custom_algorithm","description":"Update an existing custom algorithm preset.","inputSchema":{"type":"object","required":["algorithm_id","pattern_json"],"properties":{"algorithm_id":{"type":"integer","minimum":2048},"track_index":{"type":"integer","minimum":0,"maximum":3},"pattern_json":{"type":"string"}}}}
     ,{"name":"delete_custom_algorithm","description":"Delete a custom algorithm preset.","inputSchema":{"type":"object","required":["algorithm_id"],"properties":{"algorithm_id":{"type":"integer","minimum":2048},"track_index":{"type":"integer","minimum":0,"maximum":3}}}}
-    ,{"name":"share_algorithm_on_network","description":"Share a custom algorithm on the P2P network (requires ToS acceptance).","inputSchema":{"type":"object","required":["algorithm_id"],"properties":{"algorithm_id":{"type":"integer","minimum":2048},"track_index":{"type":"integer","minimum":0,"maximum":3}}}}
+    ,{"name":"share_algorithm_on_network","description":"Share a custom algorithm through the configured sharing backend (requires notice acknowledgement).","inputSchema":{"type":"object","required":["algorithm_id"],"properties":{"algorithm_id":{"type":"integer","minimum":2048},"track_index":{"type":"integer","minimum":0,"maximum":3}}}}
     ,{"name":"start_recording","description":"Start recording the audio output to a file.","inputSchema":{"type":"object","required":["path"],"properties":{"path":{"type":"string","description":"Output file path."},"format":{"type":"string","enum":["wav:f32","wav:s16","flac:24","flac:16"],"default":"wav:f32","description":"Recording format."}}}}
     ,{"name":"stop_recording","description":"Stop the current audio recording.","inputSchema":{"type":"object","properties":{}}}
     ,{"name":"get_recording_status","description":"Get the current recording status including duration and overrun info.","inputSchema":{"type":"object","properties":{}}}
@@ -78,13 +77,13 @@ juce::var McpServer::toolSchemas()
     ,{"name":"list_arrangement_presets","description":"List all saved arrangement presets.","inputSchema":{"type":"object","properties":{}}}
     ,{"name":"delete_arrangement_preset","description":"Delete a saved arrangement preset.","inputSchema":{"type":"object","required":["preset_id"],"properties":{"preset_id":{"type":"string","description":"The preset ID to delete."}}}}
     ,{"name":"save_and_sign_arrangement","description":"Save the current arrangement and sign it for P2P sharing. Returns the signed envelope.","inputSchema":{"type":"object","required":["name"],"properties":{"name":{"type":"string","description":"Name for the arrangement preset."}}}}
-    ,{"name":"share_arrangement_on_network","description":"Share a signed arrangement envelope on the P2P network.","inputSchema":{"type":"object","required":["envelope_json"],"properties":{"envelope_json":{"type":"string","description":"The signed envelope JSON to share."}}}}
-    ,{"name":"search_arrangements","description":"Search the P2P network for available arrangement presets.","inputSchema":{"type":"object","properties":{}}}
-    ,{"name":"download_arrangement","description":"Download, verify, and apply an arrangement preset from the P2P network.","inputSchema":{"type":"object","required":["envelope_json"],"properties":{"envelope_json":{"type":"string","description":"The signed envelope JSON to download and apply."}}}}
+    ,{"name":"share_arrangement_on_network","description":"Share a signed arrangement envelope through the configured sharing backend.","inputSchema":{"type":"object","required":["envelope_json"],"properties":{"envelope_json":{"type":"string","description":"The signed envelope JSON to share."}}}}
+    ,{"name":"search_arrangements","description":"Search the configured sharing backend for available arrangement presets.","inputSchema":{"type":"object","properties":{}}}
+    ,{"name":"download_arrangement","description":"Download, verify, and apply an arrangement preset from the configured sharing backend.","inputSchema":{"type":"object","required":["envelope_json"],"properties":{"envelope_json":{"type":"string","description":"The signed envelope JSON to download and apply."}}}}
     ,{"name":"save_and_sign_project","description":"Save the current project state and sign it for P2P sharing. Returns the signed envelope.","inputSchema":{"type":"object","properties":{"name":{"type":"string","description":"Optional name for the project. If omitted, uses the current project name."}}}}
-    ,{"name":"share_project_on_network","description":"Share a signed project envelope on the P2P network.","inputSchema":{"type":"object","required":["envelope_json"],"properties":{"envelope_json":{"type":"string","description":"The signed envelope JSON to share."}}}}
-    ,{"name":"search_projects","description":"Search the P2P network for available project files.","inputSchema":{"type":"object","properties":{}}}
-    ,{"name":"download_project","description":"Download and verify a project file from the P2P network. Saves it locally as a .cendance file.","inputSchema":{"type":"object","required":["envelope_json"],"properties":{"envelope_json":{"type":"string","description":"The signed envelope JSON to download and verify."}}}}
+    ,{"name":"share_project_on_network","description":"Share a signed project envelope through the configured sharing backend.","inputSchema":{"type":"object","required":["envelope_json"],"properties":{"envelope_json":{"type":"string","description":"The signed envelope JSON to share."}}}}
+    ,{"name":"search_projects","description":"Search the configured sharing backend for available project files.","inputSchema":{"type":"object","properties":{}}}
+    ,{"name":"download_project","description":"Download and verify a project file from the configured sharing backend. Saves it locally as a .cendance file.","inputSchema":{"type":"object","required":["envelope_json"],"properties":{"envelope_json":{"type":"string","description":"The signed envelope JSON to download and verify."}}}}
     ,{"name":"list_downloaded_projects","description":"List all downloaded project files.","inputSchema":{"type":"object","properties":{}}}
 
 
@@ -345,8 +344,7 @@ juce::var McpServer::handleToolsCall (juce::var const& params, const juce::var& 
     }
 
     // ─── P2P Preset Sharing tools ───
-    else if (toolName == "get_tos_status"
-             || toolName == "save_and_sign_preset"
+    else if (toolName == "save_and_sign_preset"
              || toolName == "share_on_network"
              || toolName == "search_network"
              || toolName == "verify_incoming_preset"

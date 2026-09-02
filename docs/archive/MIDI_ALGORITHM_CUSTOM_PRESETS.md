@@ -1,5 +1,9 @@
 # MIDI Algorithm Custom Presets
 
+> Archived on 2026-09-02. This implementation record is retained for historical
+> context. Current package and sharing boundaries are documented in
+> [../SHARING_ARCHITECTURE.md](../SHARING_ARCHITECTURE.md).
+
 ## Overview
 
 This feature adds user-authored MIDI/generative algorithm presets to cendance. Users can create, edit, save, share, and use custom generative algorithms alongside the 20 built-in algorithms per track.

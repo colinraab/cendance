@@ -4,7 +4,6 @@
 #include "../Source/Security/SecurityManager.h"
 #include "../Source/Network/P2PClient.h"
 #include "../Source/App/AppState.h"
-#include "../Source/Config/ToSGuard.h"
 
 #include <cassert>
 #include <iostream>
@@ -77,7 +76,6 @@ void testAgentP2pSaveAndSignPreset() {
     auto p2pClient = std::make_unique<P2PClient>();
     p2pClient->setEndpoint("file://" + tmpDir.dir.getFullPathName().toStdString() + "/store");
 
-    ToSGuard::accept();
 
     std::string lastP2pResult;
     AgentCommand::Response response;
@@ -101,7 +99,6 @@ void testAgentP2pSaveAndSignPreset() {
     ASSERT_TRUE(response.ok);
     ASSERT_FALSE(response.json.empty());
 
-    ToSGuard::configFile().deleteFile();
     PASS();
 }
 
@@ -115,7 +112,6 @@ void testAgentP2pShareOnNetwork() {
     std::vector<MeterData> history;
     ContributionPackage::Library contributionLibrary;
 
-    ToSGuard::accept();
 
     AgentCommand::Response response;
     std::string capturedTool, capturedArgs;
@@ -140,7 +136,6 @@ void testAgentP2pShareOnNetwork() {
     ASSERT_TRUE(response.ok);
     ASSERT_EQ(capturedTool, "share_on_network");
 
-    ToSGuard::configFile().deleteFile();
     PASS();
 }
 
@@ -154,7 +149,6 @@ void testAgentP2pSearchNetwork() {
     std::vector<MeterData> history;
     ContributionPackage::Library contributionLibrary;
 
-    ToSGuard::accept();
 
     AgentCommand::Response response;
 
@@ -176,7 +170,6 @@ void testAgentP2pSearchNetwork() {
     ASSERT_TRUE(response.ok);
     ASSERT_TRUE(response.json.find("presets") != std::string::npos);
 
-    ToSGuard::configFile().deleteFile();
     PASS();
 }
 
@@ -190,7 +183,6 @@ void testAgentP2pVerifyIncomingPreset() {
     std::vector<MeterData> history;
     ContributionPackage::Library contributionLibrary;
 
-    ToSGuard::accept();
 
     AgentCommand::Response response;
 
@@ -212,7 +204,6 @@ void testAgentP2pVerifyIncomingPreset() {
     ASSERT_TRUE(response.ok);
     ASSERT_TRUE(response.json.find("ok") != std::string::npos);
 
-    ToSGuard::configFile().deleteFile();
     PASS();
 }
 
@@ -226,7 +217,6 @@ void testAgentP2pSaveAndSignProject() {
     std::vector<MeterData> history;
     ContributionPackage::Library contributionLibrary;
 
-    ToSGuard::accept();
 
     AgentCommand::Response response;
 
@@ -247,7 +237,6 @@ void testAgentP2pSaveAndSignProject() {
     response = AgentCommand::execute("p2p save_and_sign_project {\"name\":\"Agent Project\"}", context);
     ASSERT_TRUE(response.ok);
 
-    ToSGuard::configFile().deleteFile();
     PASS();
 }
 
@@ -261,7 +250,6 @@ void testAgentP2pShareProjectOnNetwork() {
     std::vector<MeterData> history;
     ContributionPackage::Library contributionLibrary;
 
-    ToSGuard::accept();
 
     AgentCommand::Response response;
     std::string capturedTool;
@@ -285,7 +273,6 @@ void testAgentP2pShareProjectOnNetwork() {
     ASSERT_TRUE(response.ok);
     ASSERT_EQ(capturedTool, "share_project_on_network");
 
-    ToSGuard::configFile().deleteFile();
     PASS();
 }
 
@@ -299,7 +286,6 @@ void testAgentP2pDownloadProject() {
     std::vector<MeterData> history;
     ContributionPackage::Library contributionLibrary;
 
-    ToSGuard::accept();
 
     AgentCommand::Response response;
 
@@ -321,7 +307,6 @@ void testAgentP2pDownloadProject() {
     ASSERT_TRUE(response.ok);
     ASSERT_TRUE(response.json.find("ok") != std::string::npos);
 
-    ToSGuard::configFile().deleteFile();
     PASS();
 }
 
@@ -359,7 +344,7 @@ void testAgentP2pUnknownTool() {
 }
 
 int main() {
-    isolateToSConfigForTests();
+    isolateAppDataForTests();
     std::cout << "=== Agent Command -> P2P Bridge Integration Tests ===\n\n";
 
     testAgentP2pSaveAndSignPreset();

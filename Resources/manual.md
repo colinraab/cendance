@@ -124,7 +124,8 @@ Refs are stable identifiers for presets:
 
 ## Contribution Packages
 
-cendance packages are data-only JSON files (`.cendance-package.json`) containing presets, sounds, or effects.
+cendance packages are data-only JSON files (`.cendance-package.json`) containing
+presets, sound definitions, arrangements, scenes, drum kits, or sample assets.
 
 ### Package Kinds
 
@@ -135,6 +136,7 @@ cendance packages are data-only JSON files (`.cendance-package.json`) containing
 | `drumKitPresetPack` | Drum kit slot configurations |
 | `scenePresetPack` | Full scene snapshots (BPM, key, tracks, FX) |
 | `arrangementPresetPack` | Arrangement section definitions |
+| `samplePack` | Sample assets and metadata for validated local installation |
 
 ### Authoring Workflow
 
@@ -167,7 +169,8 @@ cendance packages are data-only JSON files (`.cendance-package.json`) containing
 2. **Do not claim numeric preset ids** — package item ids are namespaced under `packageId`
 3. **Always preview before install** — `preview_cendance_package` catches schema errors
 4. **Data-only packages** — v1 packages contain no executable code
-5. **Sound/MIDI code sharing** — reserved for future package domains (not in v1)
+5. **No native code in packages** — custom MIDI patterns and samples are data;
+   native synth, generator, and DSP code is not accepted
 6. **Always evaluate** — use `listen_to_cendance` and `get_cendance_meters` after applying changes
 
 ---
@@ -183,6 +186,18 @@ genre House
 genre randomize "UK Garage"
 genre randomize none
 ```
+
+## Experimental Sharing
+
+Sharing tools can sign and exchange presets, samples, custom sound presets,
+custom algorithms, arrangements, and projects. The application does not display
+or require a separate sharing or terms acknowledgement.
+
+The default backend is a local file store. Setting `CENDANCE_P2P_ENDPOINT`
+selects a user-operated HTTP backend; cendance does not provide a hosted public
+endpoint. The localhost agent protocol and mDNS discovery are separate
+experimental features, and cendance is not currently integrated with Pilot
+Protocol. See `docs/SHARING_ARCHITECTURE.md` for the exact boundaries.
 
 ---
 

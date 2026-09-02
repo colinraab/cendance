@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "../App/AppState.h"
-#include "../Config/ToSGuard.h"
 #include "../Network/P2PClient.h"
 #include "../Security/PresetSerializer.h"
 #include "../Security/SecurityManager.h"
@@ -26,4 +25,3 @@ private:
     PresetSerializer& presetSerializer;
     P2PClient& p2pClient;
 };
-

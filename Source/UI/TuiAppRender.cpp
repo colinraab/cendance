@@ -9,7 +9,6 @@
 #include "Components/SpectrumView.h"
 #include "Themes/Colors.h"
 #include "../Audio/Harmony/ChordProgression.h"
-#include "../Config/ToSGuard.h"
 
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_base.hpp>
@@ -786,73 +785,6 @@ ftxui::Element TuiApp::buildUI(const MeterData& currentMeters) {
         projectPathInput, saveProjectFieldFocus, recentProjectPaths,
         selectedRecentProjectIndex, projectPathStatus,
         projectPathStatusIsError);
-    composed = dbox({composed, modal});
-  }
-
-  // ── ToS Acceptance Modal (full-screen, topmost) ──
-  if (tosModalOpen) {
-    ftxui::Elements tosLines;
-
-    // Title
-    tosLines.push_back(
-        ftxui::text(" cendance Terms of Service ") | ftxui::bold | ftxui::center |
-        ftxui::color(Theme::Highlight));
-    tosLines.push_back(ftxui::separator());
-
-    // ToS text body
-    std::string tosText = ToSGuard::tosText();
-    std::istringstream tosStream(tosText);
-    std::string line;
-    std::vector<std::string> tosBodyLines;
-    while (std::getline(tosStream, line)) {
-      tosBodyLines.push_back(line);
-    }
-
-    const int bodyRows = 15;
-    const int maxScroll =
-        std::max(0, static_cast<int>(tosBodyLines.size()) - bodyRows);
-    tosScrollOffset = std::clamp(tosScrollOffset, 0, maxScroll);
-    const int startRow = tosScrollOffset;
-    const int endRow =
-        std::min(startRow + bodyRows, static_cast<int>(tosBodyLines.size()));
-
-    for (int i = startRow; i < endRow; ++i) {
-      if (tosBodyLines[static_cast<size_t>(i)].empty())
-        tosLines.push_back(ftxui::text(" "));
-      else
-        tosLines.push_back(ftxui::text(tosBodyLines[static_cast<size_t>(i)]) |
-                           ftxui::color(Theme::ModalForeground));
-    }
-
-    if (maxScroll > 0) {
-      const bool atEnd = endRow >= static_cast<int>(tosBodyLines.size());
-      tosLines.push_back(
-          ftxui::text(atEnd ? " Up/PageUp: scroll. End "
-                            : " Up/Down/PageUp/PageDown: scroll. ") |
-          ftxui::center | ftxui::color(Theme::Active));
-    }
-
-    tosLines.push_back(ftxui::separator());
-
-    // Input prompt
-    std::string inputDisplay = tosInput.empty() ? "|" : (tosInput + "|");
-    tosLines.push_back(
-        ftxui::text("Type \"I AGREE\" to accept, or press Escape to decline:") |
-        ftxui::bold | ftxui::color(Theme::Active));
-    tosLines.push_back(
-        ftxui::text(inputDisplay) |
-        ftxui::color(tosInput == "I AGREE" ? Theme::Highlight : Theme::Active));
-
-    // Status line
-    if (!tosStatus.empty()) {
-      tosLines.push_back(ftxui::text(tosStatus) |
-                         ftxui::color(Theme::Error));
-    }
-
-    auto modal = ftxui::window(
-        ftxui::text(" Terms of Service ") | ftxui::bold | ftxui::center,
-        ftxui::vbox(std::move(tosLines)) | ftxui::size(HEIGHT, LESS_THAN, 24)) |
-                 ftxui::clear_under | ftxui::center;
     composed = dbox({composed, modal});
   }
 

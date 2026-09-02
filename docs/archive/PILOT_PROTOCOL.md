@@ -1,5 +1,10 @@
 # Pilot Protocol — Agent-to-Agent Wire Format Specification
 
+> Archived on 2026-09-02. Despite its title, this document specifies an early
+> cendance-local protocol and is not the external Pilot Protocol wire format.
+> cendance has no current Pilot integration. See
+> [../SHARING_ARCHITECTURE.md](../SHARING_ARCHITECTURE.md).
+
 ## Overview
 
 The pilot protocol is a line-delimited JSON protocol for agent-to-agent communication between cendance instances. It enables remote agents to discover peers, share presets, samples, and algorithms over LAN or WAN.

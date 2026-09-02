@@ -1,6 +1,5 @@
 #include "TuiApp.h"
 #include "TuiAppInput.h"
-#include "../Config/ToSGuard.h"
 
 #include <ftxui/component/event.hpp>
 #include <ftxui/component/screen_interactive.hpp>
@@ -8,74 +7,6 @@
 #include <algorithm>
 
 using namespace tui_input;
-
-bool TuiApp::handleToSInput(const ftxui::Event& event, ftxui::ScreenInteractive& screen) {
-  using namespace ftxui;
-
-  if (event == Event::Escape) {
-    // Decline ToS — exit the application
-    screen.ExitLoopClosure()();
-    return true;
-  }
-
-  if (event == Event::ArrowDown) {
-    ++tosScrollOffset;
-    return true;
-  }
-
-  if (event == Event::ArrowUp) {
-    tosScrollOffset = std::max(0, tosScrollOffset - 1);
-    return true;
-  }
-
-  if (event == Event::PageDown) {
-    tosScrollOffset += 8;
-    return true;
-  }
-
-  if (event == Event::PageUp) {
-    tosScrollOffset = std::max(0, tosScrollOffset - 8);
-    return true;
-  }
-
-  if (event == Event::Return || event == Event::Character("\n")) {
-    if (tosInput == "I AGREE") {
-      if (ToSGuard::accept()) {
-        tosModalOpen = false;
-        tosAccepted = true;
-        onboardingTipsOpen = true;
-        tosScrollOffset = 0;
-        tosStatus = "Terms accepted. Welcome to cendance!";
-      } else {
-        tosStatus = "Failed to save acceptance. Check disk permissions.";
-      }
-    } else {
-      tosStatus = "Type \"I AGREE\" exactly (without quotes) to continue.";
-    }
-    return true;
-  }
-
-  if (event == Event::Backspace || event == Event::Character("\x7f")) {
-    if (!tosInput.empty()) {
-      tosInput.pop_back();
-    }
-    tosStatus.clear();
-    return true;
-  }
-
-  if (event.is_character()) {
-    const std::string chars = event.character();
-    if (chars.size() == 1 &&
-        std::isprint(static_cast<unsigned char>(chars[0])) &&
-        tosInput.size() < 20) {
-      tosInput.push_back(chars[0]);
-    }
-    tosStatus.clear();
-    return true;
-  }
-
-  return true;
-}
 
 bool TuiApp::handleOnboardingTipsInput(const ftxui::Event& event) {
   using namespace ftxui;

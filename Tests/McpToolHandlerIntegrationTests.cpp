@@ -5,7 +5,6 @@
 #include "../Source/Network/P2PClient.h"
 #include "../Source/App/AppState.h"
 #include "../Source/App/CustomAlgorithmPreset.h"
-#include "../Source/Config/ToSGuard.h"
 
 #include <cassert>
 #include <iostream>
@@ -89,77 +88,7 @@ static std::string makeArgs(std::initializer_list<std::pair<const char*, std::st
     return juce::JSON::toString(juce::var(obj.release()), false).toStdString();
 }
 
-// ---- Test 1: get_tos_status returns false initially ----
-void testGetTosStatusInitial() {
-    std::cout << "testGetTosStatusInitial...\n";
-    ToSGuard::configFile().deleteFile();
-    TempDir tmpDir;
-    SecurityManager sm;
-    sm.initialize();
-    auto state = makeAppState();
-    PresetSerializer serializer;
-    auto client = std::make_unique<P2PClient>();
-    client->setEndpoint("file://" + tmpDir.dir.getFullPathName().toStdString() + "/store");
-
-    P2PToolHandler handler(*state, sm, serializer, *client);
-
-    auto result = handler.handle("get_tos_status", "{}");
-    ASSERT_FALSE(result.isEmpty());
-
-    auto parsed = juce::JSON::parse(result);
-    ASSERT_TRUE(parsed.isObject());
-    ASSERT_FALSE(varGetBool(parsed, "accepted"));
-
-    PASS();
-}
-
-// ---- Test 2: After accept(), get_tos_status returns true ----
-void testTosStatusAfterAccept() {
-    std::cout << "testTosStatusAfterAccept...\n";
-    TempDir tmpDir;
-    SecurityManager sm;
-    sm.initialize();
-    auto state = makeAppState();
-    PresetSerializer serializer;
-    auto client = std::make_unique<P2PClient>();
-    client->setEndpoint("file://" + tmpDir.dir.getFullPathName().toStdString() + "/store");
-
-    P2PToolHandler handler(*state, sm, serializer, *client);
-
-    // Clean up any existing ToS config first
-    ToSGuard::configFile().deleteFile();
-
-    ASSERT_TRUE(ToSGuard::accept());
-
-    auto result = handler.handle("get_tos_status", "{}");
-    auto parsed = juce::JSON::parse(result);
-    ASSERT_TRUE(parsed.isObject());
-    ASSERT_TRUE(varGetBool(parsed, "accepted"));
-
-    // Cleanup ToS config
-    ToSGuard::configFile().deleteFile();
-
-    PASS();
-}
-
-// ---- Test 3: ToS status requires a real boolean acceptance flag ----
-void testTosStatusRejectsNonBooleanAcceptance() {
-    std::cout << "testTosStatusRejectsNonBooleanAcceptance...\n";
-    ToSGuard::configDirectory().createDirectory();
-    {
-        std::ofstream out(ToSGuard::configFile().getFullPathName().toStdString(),
-                          std::ios::binary | std::ios::trunc);
-        out << R"({"tos_accepted":"true","tos_accepted_at":"2026-01-01T00:00:00Z"})";
-    }
-
-    ASSERT_FALSE(ToSGuard::isAccepted());
-    ASSERT_TRUE(ToSGuard::acceptedTimestamp().empty());
-
-    ToSGuard::configFile().deleteFile();
-    PASS();
-}
-
-// ---- Test 4: save_and_sign_preset returns valid envelope ----
+// ---- Test 1: save_and_sign_preset returns valid envelope ----
 void testSaveAndSignPreset() {
     std::cout << "testSaveAndSignPreset...\n";
     TempDir tmpDir;
@@ -171,7 +100,6 @@ void testSaveAndSignPreset() {
     client->setEndpoint("file://" + tmpDir.dir.getFullPathName().toStdString() + "/store");
 
     P2PToolHandler handler(*state, sm, serializer, *client);
-    ToSGuard::accept();
 
     auto result = handler.handle("save_and_sign_preset", "{}");
     ASSERT_FALSE(result.isEmpty());
@@ -190,7 +118,6 @@ void testSaveAndSignPreset() {
     ASSERT_TRUE(varIsString(envParsed, "header"));
     ASSERT_TRUE(varIsString(envParsed, "payload"));
 
-    ToSGuard::configFile().deleteFile();
     PASS();
 }
 
@@ -206,7 +133,6 @@ void testShareOnNetwork() {
     client->setEndpoint("file://" + tmpDir.dir.getFullPathName().toStdString() + "/store");
 
     P2PToolHandler handler(*state, sm, serializer, *client);
-    ToSGuard::accept();
 
     // First create an envelope
     auto signResult = handler.handle("save_and_sign_preset", "{}");
@@ -223,7 +149,6 @@ void testShareOnNetwork() {
     ASSERT_TRUE(varGetBool(parsed, "ok"));
     ASSERT_TRUE(varHasProperty(parsed, "preset_id"));
 
-    ToSGuard::configFile().deleteFile();
     PASS();
 }
 
@@ -239,7 +164,6 @@ void testSearchNetwork() {
     client->setEndpoint("file://" + tmpDir.dir.getFullPathName().toStdString() + "/store");
 
     P2PToolHandler handler(*state, sm, serializer, *client);
-    ToSGuard::accept();
 
     // Create and share a preset
     auto signResult = handler.handle("save_and_sign_preset", "{}");
@@ -257,7 +181,6 @@ void testSearchNetwork() {
     ASSERT_TRUE(presets != nullptr);
     ASSERT_GE(presets->size(), (int)1);
 
-    ToSGuard::configFile().deleteFile();
     PASS();
 }
 
@@ -273,7 +196,6 @@ void testVerifyIncomingPreset() {
     client->setEndpoint("file://" + tmpDir.dir.getFullPathName().toStdString() + "/store");
 
     P2PToolHandler handler(*state, sm, serializer, *client);
-    ToSGuard::accept();
 
     // Create an envelope
     auto signResult = handler.handle("save_and_sign_preset", "{}");
@@ -290,7 +212,6 @@ void testVerifyIncomingPreset() {
     ASSERT_TRUE(varGetBool(parsed, "ok"));
     ASSERT_EQ(varGetInt(parsed, "trust_level"), 0); // Verified = 0
 
-    ToSGuard::configFile().deleteFile();
     PASS();
 }
 
@@ -306,7 +227,6 @@ void testSaveAndSignSample() {
     client->setEndpoint("file://" + tmpDir.dir.getFullPathName().toStdString() + "/store");
 
     P2PToolHandler handler(*state, sm, serializer, *client);
-    ToSGuard::accept();
 
     std::string wavPath = tmpDir.dir.getChildFile("mcptool_test.wav").getFullPathName().toStdString();
     ASSERT_TRUE(generateTestWav(wavPath));
@@ -321,7 +241,6 @@ void testSaveAndSignSample() {
     ASSERT_TRUE(varHasProperty(parsed, "sha256"));
     ASSERT_TRUE(varHasProperty(parsed, "format"));
 
-    ToSGuard::configFile().deleteFile();
     PASS();
 }
 
@@ -337,7 +256,6 @@ void testShareSampleOnNetwork() {
     client->setEndpoint("file://" + tmpDir.dir.getFullPathName().toStdString() + "/store");
 
     P2PToolHandler handler(*state, sm, serializer, *client);
-    ToSGuard::accept();
 
     std::string wavPath = tmpDir.dir.getChildFile("share_test.wav").getFullPathName().toStdString();
     ASSERT_TRUE(generateTestWav(wavPath));
@@ -355,7 +273,6 @@ void testShareSampleOnNetwork() {
     ASSERT_TRUE(parsed.isObject());
     ASSERT_TRUE(varGetBool(parsed, "ok"));
 
-    ToSGuard::configFile().deleteFile();
     PASS();
 }
 
@@ -371,7 +288,6 @@ void testSearchSamples() {
     client->setEndpoint("file://" + tmpDir.dir.getFullPathName().toStdString() + "/store");
 
     P2PToolHandler handler(*state, sm, serializer, *client);
-    ToSGuard::accept();
 
     std::string wavPath = tmpDir.dir.getChildFile("search_test.wav").getFullPathName().toStdString();
     ASSERT_TRUE(generateTestWav(wavPath));
@@ -392,7 +308,6 @@ void testSearchSamples() {
     ASSERT_TRUE(samples != nullptr);
     ASSERT_GE(samples->size(), (int)1);
 
-    ToSGuard::configFile().deleteFile();
     PASS();
 }
 
@@ -408,7 +323,6 @@ void testDownloadSample() {
     client->setEndpoint("file://" + tmpDir.dir.getFullPathName().toStdString() + "/store");
 
     P2PToolHandler handler(*state, sm, serializer, *client);
-    ToSGuard::accept();
 
     std::string wavPath = tmpDir.dir.getChildFile("download_test.wav").getFullPathName().toStdString();
     ASSERT_TRUE(generateTestWav(wavPath));
@@ -434,7 +348,6 @@ void testDownloadSample() {
     ASSERT_TRUE(varGetBool(parsed, "ok"));
     ASSERT_TRUE(varHasProperty(parsed, "local_path"));
 
-    ToSGuard::configFile().deleteFile();
     PASS();
 }
 
@@ -450,7 +363,6 @@ void testListDownloadedSamples() {
     client->setEndpoint("file://" + tmpDir.dir.getFullPathName().toStdString() + "/store");
 
     P2PToolHandler handler(*state, sm, serializer, *client);
-    ToSGuard::accept();
 
     std::string wavPath = tmpDir.dir.getChildFile("list_test.wav").getFullPathName().toStdString();
     ASSERT_TRUE(generateTestWav(wavPath));
@@ -476,7 +388,6 @@ void testListDownloadedSamples() {
     ASSERT_TRUE(downloads != nullptr);
     ASSERT_GE(downloads->size(), (int)1);
 
-    ToSGuard::configFile().deleteFile();
     PASS();
 }
 
@@ -492,7 +403,6 @@ void testSaveAndSignProject() {
     client->setEndpoint("file://" + tmpDir.dir.getFullPathName().toStdString() + "/store");
 
     P2PToolHandler handler(*state, sm, serializer, *client);
-    ToSGuard::accept();
 
     auto result = handler.handle("save_and_sign_project",
         makeArgs({{"name", "MCP Project Test"}}));
@@ -502,7 +412,6 @@ void testSaveAndSignProject() {
     ASSERT_TRUE(parsed.isObject());
     ASSERT_TRUE(varHasProperty(parsed, "envelope"));
 
-    ToSGuard::configFile().deleteFile();
     PASS();
 }
 
@@ -518,7 +427,6 @@ void testShareProjectOnNetwork() {
     client->setEndpoint("file://" + tmpDir.dir.getFullPathName().toStdString() + "/store");
 
     P2PToolHandler handler(*state, sm, serializer, *client);
-    ToSGuard::accept();
 
     auto signResult = handler.handle("save_and_sign_project",
         makeArgs({{"name", "Share Project Test"}}));
@@ -533,7 +441,6 @@ void testShareProjectOnNetwork() {
     ASSERT_TRUE(parsed.isObject());
     ASSERT_TRUE(varGetBool(parsed, "ok"));
 
-    ToSGuard::configFile().deleteFile();
     PASS();
 }
 
@@ -549,7 +456,6 @@ void testDownloadProject() {
     client->setEndpoint("file://" + tmpDir.dir.getFullPathName().toStdString() + "/store");
 
     P2PToolHandler handler(*state, sm, serializer, *client);
-    ToSGuard::accept();
 
     auto signResult = handler.handle("save_and_sign_project",
         makeArgs({{"name", "Download Project Test"}}));
@@ -572,54 +478,13 @@ void testDownloadProject() {
     ASSERT_TRUE(varGetBool(parsed, "ok"));
     ASSERT_TRUE(varHasProperty(parsed, "local_path"));
 
-    ToSGuard::configFile().deleteFile();
-    PASS();
-}
-
-// ---- Test 15: ToS guard blocks sharing tools ----
-void testTosGuardBlocksSharing() {
-    std::cout << "testTosGuardBlocksSharing...\n";
-    TempDir tmpDir;
-    SecurityManager sm;
-    sm.initialize();
-    auto state = makeAppState();
-    PresetSerializer serializer;
-    auto client = std::make_unique<P2PClient>();
-    client->setEndpoint("file://" + tmpDir.dir.getFullPathName().toStdString() + "/store");
-
-    P2PToolHandler handler(*state, sm, serializer, *client);
-    // Do NOT accept ToS — clean up any existing config
-    ToSGuard::configFile().deleteFile();
-
-    // Each sharing tool should return error 4001
-    const char* tools[] = {
-        "save_and_sign_preset",
-        "share_on_network",
-        "search_network",
-        "verify_incoming_preset",
-        "save_and_sign_sample",
-        "share_sample_on_network",
-    };
-
-    for (const char* tool : tools) {
-        auto result = handler.handle(tool, "{}");
-        ASSERT_FALSE(result.isEmpty());
-        auto parsed = juce::JSON::parse(result);
-        ASSERT_TRUE(parsed.isObject());
-        int code = varGetInt(parsed, "code");
-        ASSERT_EQ(code, 4001);
-    }
-
     PASS();
 }
 
 int main() {
-    isolateToSConfigForTests();
+    isolateAppDataForTests();
     std::cout << "=== MCP Tool Handler Integration Tests ===\n\n";
 
-    testGetTosStatusInitial();
-    testTosStatusAfterAccept();
-    testTosStatusRejectsNonBooleanAcceptance();
     testSaveAndSignPreset();
     testShareOnNetwork();
     testSearchNetwork();
@@ -632,7 +497,6 @@ int main() {
     testSaveAndSignProject();
     testShareProjectOnNetwork();
     testDownloadProject();
-    testTosGuardBlocksSharing();
 
     std::cout << "\n=== Results: " << testsPassed << " passed, " << testsFailed << " failed ===\n";
     return testsFailed > 0 ? 1 : 0;

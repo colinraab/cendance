@@ -23,10 +23,6 @@ String makeError(int code, const String& message) {
     return JSON::toString(var(errObj), false);
 }
 
-String tosError() {
-    return makeError(4001, "Terms of Service not accepted");
-}
-
 } // namespace
 
 P2PToolHandler::P2PToolHandler(AppState& appState,
@@ -45,20 +41,7 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
         juce::var v = args.getProperty(key, juce::var());
         return v.toString().toStdString();
     };
-    auto tosError = [&]() -> juce::String {
-        return makeError(4001, "Terms of Service not accepted");
-    };
-
-    if (toolName == "get_tos_status") {
-        auto* res = new juce::DynamicObject();
-        res->setProperty("accepted", ToSGuard::isAccepted());
-        res->setProperty("timestamp", juce::String(ToSGuard::acceptedTimestamp()));
-        return juce::JSON::toString(juce::var(res), false);
-    }
-    else if (toolName == "save_and_sign_preset") {
-        if (!ToSGuard::isAccepted()) {
-            return tosError();
-        }
+    if (toolName == "save_and_sign_preset") {
         std::string error;
         std::string envelope = presetSerializer.createEnvelope(appState, securityManager, error);
         if (envelope.empty()) {
@@ -69,9 +52,6 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
         return juce::JSON::toString(juce::var(res), false);
     }
     else if (toolName == "share_on_network") {
-        if (!ToSGuard::isAccepted()) {
-            return tosError();
-        }
         std::string presetJson = getStr("preset_json");
         if (presetJson.empty()) {
             return makeError(4002, "preset_json is required");
@@ -85,9 +65,6 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
         return juce::JSON::toString(juce::var(res), false);
     }
     else if (toolName == "search_network") {
-        if (!ToSGuard::isAccepted()) {
-            return tosError();
-        }
         auto results = p2pClient.searchPresets().get();
         auto* res = new juce::DynamicObject();
         juce::Array<juce::var> entries;
@@ -103,9 +80,6 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
         return juce::JSON::toString(juce::var(res), false);
     }
     else if (toolName == "verify_incoming_preset") {
-        if (!ToSGuard::isAccepted()) {
-            return tosError();
-        }
         std::string presetJson = getStr("preset_json");
         if (presetJson.empty()) {
             return makeError(4002, "preset_json is required");
@@ -121,9 +95,6 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
         return juce::JSON::toString(juce::var(res), false);
     }
     else if (toolName == "list_downloaded_presets") {
-        if (!ToSGuard::isAccepted()) {
-            return tosError();
-        }
         auto entries = p2pClient.registry().allEntries();
         auto* res = new juce::DynamicObject();
         juce::Array<juce::var> arr;
@@ -140,7 +111,6 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
         return juce::JSON::toString(juce::var(res), false);
     }
     else if (toolName == "save_and_sign_sample") {
-        if (!ToSGuard::isAccepted()) return tosError();
         SampleEnvelopeMetadata metadata;
         metadata.name = getStr("name");
         metadata.description = getStr("description");
@@ -167,7 +137,6 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
         return juce::JSON::toString(juce::var(res), false);
     }
     else if (toolName == "share_sample_on_network") {
-        if (!ToSGuard::isAccepted()) return tosError();
         const auto result = p2pClient.publishSample(getStr("sample_json")).get();
         auto* res = new juce::DynamicObject();
         res->setProperty("ok", result.ok);
@@ -176,7 +145,6 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
         return juce::JSON::toString(juce::var(res), false);
     }
     else if (toolName == "search_samples") {
-        if (!ToSGuard::isAccepted()) return tosError();
         const std::string query = getStr("query");
         const std::string format = getStr("format");
         auto results = p2pClient.searchSamples().get();
@@ -201,7 +169,6 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
         return juce::JSON::toString(juce::var(res), false);
     }
     else if (toolName == "download_sample") {
-        if (!ToSGuard::isAccepted()) return tosError();
         const std::string sampleId = getStr("sample_id");
         const std::string envelope = p2pClient.requestSample(sampleId).get();
         if (envelope.empty()) {
@@ -236,7 +203,6 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
         return juce::JSON::toString(juce::var(res), false);
     }
     else if (toolName == "list_downloaded_samples") {
-        if (!ToSGuard::isAccepted()) return tosError();
         auto entries = p2pClient.registry().allEntries();
         auto* res = new juce::DynamicObject();
         juce::Array<juce::var> arr;
@@ -259,7 +225,6 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
         return juce::JSON::toString(juce::var(res), false);
     }
     else if (toolName == "create_custom_sound_preset") {
-        if (!ToSGuard::isAccepted()) return tosError();
         const int track = static_cast<int>(args.getProperty("track", 0));
         const bool includeSamples = static_cast<bool>(args.getProperty("includeSamples", true));
         std::string error;
@@ -274,7 +239,6 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
     }
 
     else if (toolName == "share_algorithm_on_network") {
-        if (!ToSGuard::isAccepted()) return tosError();
         const int algoId = static_cast<int>(args.getProperty("algorithm_id", 0));
         const int trackIdx = static_cast<int>(args.getProperty("track_index", 0));
         const auto* preset = globalAlgorithmPresetRegistry().findByRuntimeId(
@@ -298,7 +262,6 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
 
     // ─── Arrangement preset sharing ───
     else if (toolName == "save_and_sign_arrangement") {
-        if (!ToSGuard::isAccepted()) return tosError();
         std::string name = getStr("name");
         if (name.empty()) {
             return makeError(4002, "name is required");
@@ -313,7 +276,6 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
         return juce::JSON::toString(juce::var(res), false);
     }
     else if (toolName == "share_arrangement_on_network") {
-        if (!ToSGuard::isAccepted()) return tosError();
         std::string envelopeJson = getStr("envelope_json");
         if (envelopeJson.empty()) {
             return makeError(4002, "envelope_json is required");
@@ -327,7 +289,6 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
         return juce::JSON::toString(juce::var(res), false);
     }
     else if (toolName == "search_arrangements") {
-        if (!ToSGuard::isAccepted()) return tosError();
         // Reuse the same search as presets — arrangement presets use the same content type
         auto results = p2pClient.searchPresets().get();
         auto* res = new juce::DynamicObject();
@@ -344,7 +305,6 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
         return juce::JSON::toString(juce::var(res), false);
     }
     else if (toolName == "download_arrangement") {
-        if (!ToSGuard::isAccepted()) return tosError();
         std::string envelopeJson = getStr("envelope_json");
         if (envelopeJson.empty()) {
             return makeError(4002, "envelope_json is required");
@@ -379,7 +339,6 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
 
     // ─── Project file sharing ───
     else if (toolName == "save_and_sign_project") {
-        if (!ToSGuard::isAccepted()) return tosError();
         std::string name = getStr("name");
         std::string error;
         std::string envelope = presetSerializer.createProjectEnvelope(appState, name, securityManager, error);
@@ -391,7 +350,6 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
         return juce::JSON::toString(juce::var(res), false);
     }
     else if (toolName == "share_project_on_network") {
-        if (!ToSGuard::isAccepted()) return tosError();
         std::string envelopeJson = getStr("envelope_json");
         if (envelopeJson.empty()) {
             return makeError(4002, "envelope_json is required");
@@ -405,7 +363,6 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
         return juce::JSON::toString(juce::var(res), false);
     }
     else if (toolName == "search_projects") {
-        if (!ToSGuard::isAccepted()) return tosError();
         auto results = p2pClient.searchPresets().get();
         auto* res = new juce::DynamicObject();
         juce::Array<juce::var> entries;
@@ -421,7 +378,6 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
         return juce::JSON::toString(juce::var(res), false);
     }
     else if (toolName == "download_project") {
-        if (!ToSGuard::isAccepted()) return tosError();
         std::string envelopeJson = getStr("envelope_json");
         if (envelopeJson.empty()) {
             return makeError(4002, "envelope_json is required");
@@ -476,7 +432,6 @@ String P2PToolHandler::handle(const String& toolName, const String& argsJson) {
         return juce::JSON::toString(juce::var(res), false);
     }
     else if (toolName == "list_downloaded_projects") {
-        if (!ToSGuard::isAccepted()) return tosError();
         auto dir = PresetSerializer::downloadProjectDirectory();
         auto files = dir.findChildFiles(juce::File::findFiles, false, "*.cendance");
         auto* res = new juce::DynamicObject();

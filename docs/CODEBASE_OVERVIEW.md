@@ -68,7 +68,7 @@ Source/
 
 ---
 
-## 🛠 Feature Development Checklist
+## Feature Development Checklist
 
 When implementing new features, making layout changes, or editing DSP, follow these checklists carefully to preserve the thread-safety and architecture of `cendance`.
 
@@ -100,4 +100,22 @@ When implementing new features, making layout changes, or editing DSP, follow th
 - [ ] Keep tests deterministic and free of external dependencies (no audio device assumptions, no filesystem/network IO).
 - [ ] For real-time sensitive code paths, test pure decision/state logic around the path rather than callback wall-clock behavior.
 - [ ] Minimum test run before handoff: changed-area tests + `ctest --test-dir build --output-on-failure`.
-- [ ] Current test binaries: `cendance_tests` (queues), `cendance_harmony_tests` (harmony), `cendance_keymapping_tests` (input mapping), `cendance_core_tests` (AppState/Transport/harmony helpers).
+- [ ] Run `ctest --test-dir build -N` to inspect the current target inventory,
+  then run changed-area targets and the full suite. `CMakeLists.txt` is the
+  source of truth; it currently registers 22 unit and integration targets.
+
+## Sharing and Network Boundaries
+
+- MCP uses local stdio and does not expose a network listener.
+- The agent line protocol binds to `127.0.0.1` and is local-only.
+- Sharing defaults to a file-backed local store. A remote HTTP backend exists
+  only when the user sets `CENDANCE_P2P_ENDPOINT`.
+- mDNS discovery is experimental and does not make the loopback agent server
+  remotely reachable.
+- cendance is not currently integrated with Pilot Protocol.
+
+The deferred Pilot adapter design is archived in
+[Future Pilot Protocol Integration Notes](archive/PILOT_PROTOCOL_INTEGRATION_NOTES.md).
+
+See [SHARING_ARCHITECTURE.md](SHARING_ARCHITECTURE.md) before changing package
+exchange, discovery, signatures, or network transport.

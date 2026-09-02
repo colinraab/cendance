@@ -1,12 +1,12 @@
 #include "AlgorithmPresetRegistry.h"
 #include "AlgorithmCatalog.h"
-#include "../Config/ToSGuard.h"
+#include "../Config/AppDirectories.h"
 
 #include <algorithm>
 #include <fstream>
 
 AlgorithmPresetRegistry::AlgorithmPresetRegistry() {
-    rootDir_ = ToSGuard::configDirectory().getChildFile("algorithms");
+    rootDir_ = AppDirectories::dataDirectory().getChildFile("algorithms");
     indexFile_ = rootDir_.getChildFile("index.json");
 }
 

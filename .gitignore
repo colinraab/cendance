@@ -104,6 +104,7 @@ Thumbs.db
 .cursor/
 .cursorrules
 .aider*
+/code-wiki/
 
 # Temporary and backup files
 *.bak
