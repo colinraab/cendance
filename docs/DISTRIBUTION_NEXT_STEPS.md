@@ -8,25 +8,24 @@ cendance has an early macOS developer preview, but it is not yet packaged as a
 signed, notarized consumer release.
 
 - App target: terminal-first JUCE + FTXUI executable, not a `.app` bundle.
-- Primary platform: macOS. The v0.1.0 binaries target macOS 15, and CI validates
-  them on arm64 and x86_64. Source builds target macOS 13 by default, but macOS
-  13–14 runtime compatibility is not release-validated.
+- Primary platform: macOS. The current preview binaries target macOS 15, and
+  CI validates them on arm64 and x86_64. Source builds target macOS 13 by
+  default, but macOS 13–14 runtime compatibility is not release-validated.
 - Build system: CMake + JUCE submodule + FTXUI FetchContent + libsodium.
 - Tests: 22 CTest targets, with assertions kept active in Release builds.
 - MCP: built into the same binary; launch with `cendance --mcp`.
 - Packaging: CPack creates a `.tar.gz` containing the executable, software
-  license, audio license, IR provenance, and third-party notices. The v0.1.0
-  GitHub prerelease publishes arm64 and x86_64 archives with matching SHA-256
-  files.
+  license, audio license, IR provenance, and third-party notices. The GitHub
+  prerelease publishes arm64 and x86_64 archives with matching SHA-256 files.
 - Windows: not release-ready. Some code paths are still POSIX-only and the
   localhost agent protocol reports "not implemented on Windows yet."
 
 ## Remaining Release Work
 
-Completed for the v0.1.0 developer preview:
+Completed for the developer preview:
 
 - Both macOS 15 Release jobs pass with all 22 tests on arm64 and x86_64.
-- The v0.1.0 prerelease is explicitly labeled as unsigned.
+- The prerelease is explicitly labeled as unsigned.
 - Both release archives have matching SHA-256 files.
 - `main` requires both CI jobs, one approving review, resolved conversations,
   and linear history. Force pushes and branch deletion are disabled.
@@ -76,9 +75,8 @@ cmake --build build-release --target package
 shasum -a 256 build-release/cendance-*.tar.gz
 ```
 
-The current Ninja output path is `build-release/cendance_artefacts/cendance`;
-there is no `cendance_artefacts/Release/` directory in a single-config Ninja
-build.
+The current Ninja output path is
+`build-release/cendance_artefacts/Release/cendance`.
 
 ### Signing and Notarization Sketch
 
@@ -111,7 +109,7 @@ cp dist/macos-arm64/cendance dist/pkgroot/usr/local/bin/cendance
 pkgbuild \
   --root dist/pkgroot \
   --identifier app.cendance.cli \
-  --version 0.1.0 \
+  --version 0.1.1 \
   --install-location / \
   --sign "$CENDANCE_DEVELOPER_ID_INSTALLER" \
   dist/cendance-macos-arm64.pkg
@@ -244,7 +242,7 @@ After Homebrew install:
 
 ## Recommended Next Steps
 
-1. Make the repository public when its contents and v0.1.0 prerelease are ready
+1. Make the repository public when its contents and current prerelease are ready
    for external access.
 2. Enable GitHub private vulnerability reporting immediately afterward.
 3. Invite a small group of macOS 15 users to test the unsigned preview and its

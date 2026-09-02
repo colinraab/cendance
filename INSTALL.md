@@ -1,16 +1,16 @@
 # Installing cendance
 
-cendance v0.1.0 is available as an unsigned macOS 15 developer preview for
+cendance v0.1.1 is available as an unsigned macOS 15 developer preview for
 Apple silicon and Intel Macs. You can run the release executable in place,
 install it on your `PATH`, or build it from source.
 
 ## Download the macOS Release
 
-Open [the v0.1.0 release](https://github.com/colinraab/cendance/releases/tag/v0.1.0)
+Open [the v0.1.1 release](https://github.com/colinraab/cendance/releases/tag/v0.1.1)
 and download the archive and matching `.sha256` file for your Mac:
 
-- Apple silicon: `cendance-0.1.0-Darwin-arm64.tar.gz`
-- Intel: `cendance-0.1.0-Darwin-x86_64.tar.gz`
+- Apple silicon: `cendance-0.1.1-Darwin-arm64.tar.gz`
+- Intel: `cendance-0.1.1-Darwin-x86_64.tar.gz`
 
 Run `uname -m` if you are unsure which architecture you have. It prints
 `arm64` on Apple silicon and `x86_64` on an Intel Mac.
@@ -21,9 +21,9 @@ Keep the archive and checksum file in the same directory. For Apple silicon:
 
 ```bash
 cd ~/Downloads
-shasum -a 256 -c cendance-0.1.0-Darwin-arm64.tar.gz.sha256
-tar -xzf cendance-0.1.0-Darwin-arm64.tar.gz
-cd cendance-0.1.0-Darwin-arm64
+shasum -a 256 -c cendance-0.1.1-Darwin-arm64.tar.gz.sha256
+tar -xzf cendance-0.1.1-Darwin-arm64.tar.gz
+cd cendance-0.1.1-Darwin-arm64
 ./bin/cendance --help
 ./bin/cendance
 ```
@@ -82,7 +82,7 @@ cmake -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build-release
 ctest --test-dir build-release --output-on-failure
 
-./build-release/cendance_artefacts/cendance
+./build-release/cendance_artefacts/Release/cendance
 ```
 
 Source builds are local binaries and normally do not inherit the quarantine
@@ -96,7 +96,7 @@ Use the same binary with `--mcp`:
 {
   "mcpServers": {
     "cendance": {
-      "command": "/absolute/path/to/cendance-0.1.0-Darwin-arm64/bin/cendance",
+      "command": "/absolute/path/to/cendance-0.1.1-Darwin-arm64/bin/cendance",
       "args": ["--mcp"]
     }
   }

@@ -49,11 +49,11 @@ cmake -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build-release
 ctest --test-dir build-release --output-on-failure
 
-# Create cendance-0.1.0-<system>-<architecture>.tar.gz
+# Create cendance-<version>-<system>-<architecture>.tar.gz
 cmake --build build-release --target package
 
 # Release executable
-./build-release/cendance_artefacts/cendance --help
+./build-release/cendance_artefacts/Release/cendance --help
 ```
 
 ## CLI Options
