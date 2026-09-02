@@ -11,7 +11,6 @@
 #include "../App/ProjectKey.h"
 #include "../App/SynthCatalog.h"
 #include "../Audio/Harmony/ChordProgression.h"
-#include "../Config/ToSGuard.h"
 #include "Components/AgentInputBar.h"
 #include "Components/ArrangementModal.h"
 #include "Components/KeyEntryModal.h"
@@ -584,10 +583,6 @@ void TuiApp::run() {
       agentServer.reset();
     }
   }
-
-  // ── ToS check: block with full-screen modal on first run ──
-  tosAccepted = ToSGuard::isAccepted();
-  tosModalOpen = !tosAccepted;
 
   // ── Renderer delegates to extracted method ──────────────────────────
   auto renderer = Renderer([this, &currentMeters]() -> Element {

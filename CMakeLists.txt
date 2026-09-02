@@ -5,7 +5,7 @@ if(APPLE AND "${CMAKE_OSX_DEPLOYMENT_TARGET}" STREQUAL "")
         "Requested minimum macOS deployment version" FORCE)
 endif()
 
-project(cendance VERSION 0.1.1 LANGUAGES C CXX)
+project(cendance VERSION 0.1.2 LANGUAGES C CXX)
 
 include(CTest)
 
@@ -158,7 +158,6 @@ target_sources(cendance PRIVATE
     Source/Audio/EffectProcessor.cpp
     Source/Audio/CommandProcessor.cpp
     Source/Audio/Generators/CustomAlgorithmInstance.cpp
-    Source/Config/ToSGuard.cpp
     Source/Audio/Transport.cpp
     Source/Audio/Harmony/Scale.cpp
     Source/Audio/Harmony/ChordProgression.cpp
@@ -374,7 +373,6 @@ add_executable(cendance_agent_command_tests
     Source/App/AlgorithmPresetRegistry.cpp
     Source/App/CustomAlgorithmPreset.cpp
     Source/App/GenreCatalog.cpp
-    Source/Config/ToSGuard.cpp
     Source/Audio/Harmony/ChordProgression.cpp
     Source/Mcp/McpServer.cpp
     Source/Mcp/McpTools.cpp
@@ -440,7 +438,6 @@ add_executable(cendance_project_io_tests
     Source/App/AlgorithmPresetRegistry.cpp
     Source/App/CustomAlgorithmPreset.cpp
     Source/App/GenreCatalog.cpp
-    Source/Config/ToSGuard.cpp
 )
 target_link_libraries(cendance_project_io_tests PRIVATE
     juce::juce_core
@@ -465,7 +462,6 @@ add_executable(cendance_audio_integration_tests
     Source/Audio/EffectProcessor.cpp
     Source/Audio/CommandProcessor.cpp
     Source/Audio/Generators/CustomAlgorithmInstance.cpp
-    Source/Config/ToSGuard.cpp
     Source/Audio/Transport.cpp
     Source/Audio/Harmony/Scale.cpp
     Source/Audio/Harmony/ChordProgression.cpp
@@ -607,7 +603,6 @@ add_executable(cendance_arrangement_preset_tests
     Source/App/AlgorithmPresetRegistry.cpp
     Source/App/CustomAlgorithmPreset.cpp
     Source/Audio/Harmony/ChordProgression.cpp
-    Source/Config/ToSGuard.cpp
 )
 target_link_libraries(cendance_arrangement_preset_tests PRIVATE
     juce::juce_core
@@ -639,7 +634,6 @@ add_executable(cendance_custom_algorithm_preset_tests
     Source/App/PresetRegistry.cpp
     Source/App/ProjectKey.cpp
     Source/Audio/Harmony/ChordProgression.cpp
-    Source/Config/ToSGuard.cpp
 )
 target_link_libraries(cendance_custom_algorithm_preset_tests PRIVATE
     juce::juce_core
@@ -703,7 +697,6 @@ add_executable(cendance_p2p_integration_tests
     Source/App/AlgorithmPresetRegistry.cpp
     Source/App/CustomAlgorithmPreset.cpp
     Source/App/GenreCatalog.cpp
-    Source/Config/ToSGuard.cpp
     Source/Audio/Harmony/ChordProgression.cpp
 )
 target_link_libraries(cendance_p2p_integration_tests PRIVATE
@@ -736,7 +729,6 @@ add_executable(cendance_security_integration_tests
     Source/App/AlgorithmPresetRegistry.cpp
     Source/App/CustomAlgorithmPreset.cpp
     Source/App/GenreCatalog.cpp
-    Source/Config/ToSGuard.cpp
     Source/Audio/Harmony/ChordProgression.cpp
 )
 target_link_libraries(cendance_security_integration_tests PRIVATE
@@ -770,7 +762,6 @@ add_executable(cendance_mcp_tool_handler_integration_tests
     Source/App/AlgorithmPresetRegistry.cpp
     Source/App/CustomAlgorithmPreset.cpp
     Source/App/GenreCatalog.cpp
-    Source/Config/ToSGuard.cpp
     Source/Audio/Harmony/ChordProgression.cpp
 )
 target_link_libraries(cendance_mcp_tool_handler_integration_tests PRIVATE
@@ -819,7 +810,6 @@ add_executable(cendance_agent_command_p2p_integration_tests
     Source/App/AlgorithmPresetRegistry.cpp
     Source/App/CustomAlgorithmPreset.cpp
     Source/App/GenreCatalog.cpp
-    Source/Config/ToSGuard.cpp
     Source/Audio/Harmony/ChordProgression.cpp
     Source/Security/PresetSerializer.cpp
     Source/Security/SecurityManager.cpp

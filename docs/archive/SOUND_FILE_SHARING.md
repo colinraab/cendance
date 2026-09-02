@@ -1,5 +1,8 @@
 # Sound File Sharing — Implementation Documentation
 
+> Archived on 2026-09-02. This implementation record is not the current sharing
+> specification. See [../SHARING_ARCHITECTURE.md](../SHARING_ARCHITECTURE.md).
+
 **Ticket:** t_b2987186  
 **Status:** ✅ Complete  
 **Build:** Clean compilation, arm64 Mach-O binary verified

@@ -1,5 +1,9 @@
 # Public Repository Checklist
 
+> Archived on 2026-09-02 after the developer-preview release audit. This is a
+> historical completion record, not the current release plan. See
+> [../DISTRIBUTION_NEXT_STEPS.md](../DISTRIBUTION_NEXT_STEPS.md).
+
 Use this checklist to track the private cendance repository and decide when it
 is ready to become public.
 

@@ -33,4 +33,5 @@ and provenance. Document third-party dependencies and assets in
 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) or the relevant resource
 notice.
 
-All contributors must follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+Keep discussions specific to the work, assume good faith, and use the security
+reporting process in [SECURITY.md](SECURITY.md) for vulnerabilities.

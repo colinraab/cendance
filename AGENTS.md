@@ -1,4 +1,4 @@
-# cendance agent instructions
+# Cendance repository instructions
 
 ## Project purpose
 - `cendance` is a terminal-first generative music app: FTXUI UI + JUCE audio runtime.
@@ -55,4 +55,5 @@
 ## Repository boundaries
 - `JUCE/` is vendored upstream framework code; avoid edits there unless the task explicitly requires JUCE internals.
 - Prefer changes under `Source/` and `Tests/`.
-- Read `code-wiki/index.md` before working in this codebase.
+- Read `docs/CODEBASE_OVERVIEW.md` before making architectural changes. For
+  package exchange or network work, also read `docs/SHARING_ARCHITECTURE.md`.

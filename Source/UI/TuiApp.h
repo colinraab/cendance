@@ -131,8 +131,6 @@ private:
                         const MeterData& currentMeters);
 
   // Modal input handlers (extracted from handleEventInput)
-  bool handleToSInput(const ftxui::Event& event,
-                      ftxui::ScreenInteractive& screen);
   bool handleOnboardingTipsInput(const ftxui::Event& event);
   bool handleAgentInput(const ftxui::Event& event,
                         const MeterData& currentMeters);
@@ -274,12 +272,6 @@ private:
   std::vector<DrumSampleLibrary::SampleRecord> drumSampleEntries;
   int selectedDrumSampleIndex = 0;
 
-  // ToS Acceptance Modal
-  bool tosModalOpen = false;
-  std::string tosInput;
-  std::string tosStatus;
-  int tosScrollOffset = 0;
-  bool tosAccepted = false;
   bool onboardingTipsOpen = false;
 
   bool soundFileBrowserOpen = false;

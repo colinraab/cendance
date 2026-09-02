@@ -6,7 +6,6 @@
 #include "../Source/App/AppState.h"
 #include "../Source/App/ArrangementPresetManager.h"
 #include "../Source/App/CustomAlgorithmPreset.h"
-#include "../Source/Config/ToSGuard.h"
 
 #include <cassert>
 #include <iostream>

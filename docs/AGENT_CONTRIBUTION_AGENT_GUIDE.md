@@ -3,7 +3,7 @@
 This guide is for agents that want to discover, exchange, install, apply, or
 author cendance contribution packages.
 
-Read this together with `AGENT_CONTRIBUTION_NETWORK_PLAN.md`.
+Read this together with [SHARING_ARCHITECTURE.md](SHARING_ARCHITECTURE.md).
 
 ## Mental Model
 
@@ -37,7 +37,8 @@ cendance's local validator is the source of truth.
 
 - `drumKitPresetPack`
   - Use when sharing drum slot mappings and slot parameters.
-  - In the first version, prefer built-in or already-installed samples.
+  - Reference built-in or already-installed samples, or declare a validated
+    `samplePack` dependency.
 
 - `scenePresetPack`
   - Use when sharing a multi-track musical state or starting point.
@@ -45,13 +46,17 @@ cendance's local validator is the source of truth.
 - `arrangementPresetPack`
   - Use when sharing section structure and arrangement behavior.
 
-Future kinds such as `samplePack`, `midiGeneratorPack`, `effectAlgorithmPack`,
-and `instrumentEnginePack` require stricter rules and should not be assumed to
-exist until the package schema says they are supported.
+- `samplePack`
+  - Use when sharing WAV, FLAC, or OGG sample assets with metadata, hashes,
+    provenance, and license information.
+
+Future kinds such as `midiGeneratorPack`, `effectAlgorithmPack`, and
+`instrumentEnginePack` require stricter rules and should not be assumed to exist
+until the package schema says they are supported.
 
 ## Discovery Flow
 
-When connected to a cendance-capable peer through the Pilot bridge:
+When using the local file store or a user-configured cendance HTTP backend:
 
 1. Ask for package metadata, not package payloads.
 2. Filter by kind, tags, compatibility, license, and trust status.
@@ -163,18 +168,20 @@ Do not use `soundPresetPack` for:
 
 - New DSP code.
 - New synth engines.
-- New sample files that are not already installed or built in.
+- New sample files that are not already installed, built in, or supplied through
+  a separate validated `samplePack`.
 - New MIDI generation logic.
 
-## Future Extension Expectations
+## Extension Expectations
 
 Agents should be prepared for additional package kinds without changing the
 core lifecycle.
 
-For `samplePack`:
+For the supported `samplePack` kind:
 
-- Expect audio payloads, file hashes, format checks, license metadata, duration
-  limits, and loudness/peak metadata.
+- Expect audio payloads, file hashes, format checks, and license/provenance
+  metadata. Treat size, duration, peak, and loudness limits as validator policy
+  that may evolve.
 - Do not install or apply samples without provenance and size checks.
 
 For `midiGeneratorPack`:

@@ -1,5 +1,9 @@
 # cendance Agent Contribution Network Plan
 
+> Archived on 2026-09-02. This original design assumed a future Pilot bridge and
+> predates the implemented sharing backends. See
+> [../SHARING_ARCHITECTURE.md](../SHARING_ARCHITECTURE.md) for current behavior.
+
 ## Goal
 
 Make cendance extensible by agents without requiring remote agents to modify or

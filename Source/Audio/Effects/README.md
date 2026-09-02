@@ -1,8 +1,10 @@
 # Effects Organization and Selector Rules
 
-This directory is organized by numeric effect categories used by the FX number selector.
+This directory uses a historical folder order for source organization. The
+folder prefixes are not the digits used by the FX number selector. The selector
+mapping in `EffectPresetCatalog.h` is the public and authoritative mapping.
 
-## Folder taxonomy
+## Source folder taxonomy
 
 - `0_Dynamics`
 - `1_Space`
@@ -68,4 +70,4 @@ Spot effects live in `Spot`:
    - preset entries
    - type to category mapping for selector resolution
 5. Keep spot-only effects out of slot-assignable mapping.
-6. Update the category `TODO.md` file.
+6. Update this README when the folder taxonomy or selector mapping changes.

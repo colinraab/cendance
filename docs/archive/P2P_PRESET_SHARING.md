@@ -1,5 +1,9 @@
 # P2P Preset Sharing — Implementation Summary
 
+> Archived on 2026-09-02. This milestone summary is retained for history and may
+> describe behavior that has since changed. See
+> [../SHARING_ARCHITECTURE.md](../SHARING_ARCHITECTURE.md).
+
 **Ticket:** t_d17983e6
 **Status:** Complete — all 5 phases implemented and building cleanly
 

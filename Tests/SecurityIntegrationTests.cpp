@@ -2,7 +2,6 @@
 #include "../Source/Security/SecurityManager.h"
 #include "../Source/Security/PresetSerializer.h"
 #include "../Source/Security/ContentHeader.h"
-#include "../Source/Config/ToSGuard.h"
 
 #include <cassert>
 #include <iostream>

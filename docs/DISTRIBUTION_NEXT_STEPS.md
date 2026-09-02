@@ -1,6 +1,6 @@
 # cendance Distribution Next Steps
 
-Last reviewed: 2026-08-31
+Last reviewed: 2026-09-02
 
 ## Current State
 
@@ -109,7 +109,7 @@ cp dist/macos-arm64/cendance dist/pkgroot/usr/local/bin/cendance
 pkgbuild \
   --root dist/pkgroot \
   --identifier app.cendance.cli \
-  --version 0.1.1 \
+  --version 0.1.2 \
   --install-location / \
   --sign "$CENDANCE_DEVELOPER_ID_INSTALLER" \
   dist/cendance-macos-arm64.pkg
@@ -131,7 +131,7 @@ the entitlements required by a concrete notarization or runtime failure.
 
 `.github/workflows/ci.yml` builds, tests, and packages Release on macOS 15 arm64
 and Intel. Both archives are retained as short-lived workflow artifacts. The
-v0.1.0 prerelease was published from a successful two-architecture run and its
+v0.1.1 prerelease was published from a successful two-architecture run and its
 uploaded assets were downloaded and checksum-verified after publication. Keep
 polished release publishing separate from pull-request CI: a future
 tag-triggered workflow should sign, notarize, checksum, and upload only after
@@ -146,17 +146,17 @@ not published or installation-tested yet:
 class Cendance < Formula
   desc "Terminal generative music app with an embedded MCP server"
   homepage "https://github.com/colinraab/cendance"
-  version "0.1.0"
+  version "0.1.1"
   license "AGPL-3.0-only"
 
   on_arm do
-    url "https://github.com/colinraab/cendance/releases/download/v0.1.0/cendance-0.1.0-Darwin-arm64.tar.gz"
-    sha256 "74616179800f811fcf776596c367f21eaf15198439cfd3f2d1b5a3b1ebc77d11"
+    url "https://github.com/colinraab/cendance/releases/download/v0.1.1/cendance-0.1.1-Darwin-arm64.tar.gz"
+    sha256 "8181d2771f082238070501df089c4169b204d973c7d575bc74aba1db400b87b2"
   end
 
   on_intel do
-    url "https://github.com/colinraab/cendance/releases/download/v0.1.0/cendance-0.1.0-Darwin-x86_64.tar.gz"
-    sha256 "09480b0e344b8533d776bb5b999463d3cdfe0d6ad190f16baf894567890e0b11"
+    url "https://github.com/colinraab/cendance/releases/download/v0.1.1/cendance-0.1.1-Darwin-x86_64.tar.gz"
+    sha256 "36dece37a053753c0c36908f01b3d0987ef9ac88426fa435f7f19ba2a85bc3f1"
   end
 
   def install

@@ -14,7 +14,6 @@
 #include "App/ProjectIOLoad.h"
 #include "App/StartupRuntime.h"
 #include "App/StdoutRedirect.h"
-#include "Config/ToSGuard.h"
 #include "Mcp/McpMode.h"
 #include "Mcp/P2PToolHandler.h"
 #include "Network/P2PClient.h"
@@ -134,7 +133,8 @@ int main(int argc, char* argv[])
     // 3. Apply startup project or randomize
     applyStartupProjectOrRandomize(runtime, startup, cli.options.loadProjectPath);
 
-    // Initialize P2P infrastructure (always available; ToS gates actual use)
+    // Initialize sharing infrastructure (available locally; acknowledgement
+    // gates signing and exchange operations).
     SecurityManager securityManager;
     securityManager.initialize();
     PresetSerializer presetSerializer;

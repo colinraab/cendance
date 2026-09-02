@@ -1,4 +1,8 @@
-# cendance Terms of Service
+# Archived cendance Terms of Service Template
+
+> Archived on 2026-09-02. This unused template is not part of the current
+> release, is not presented to users, and is not accepted or enforced by the
+> application. It is retained only as historical design material.
 
 Last updated: 2026-05-17
 

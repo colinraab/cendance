@@ -124,14 +124,25 @@ default for console apps). The project uses `runDispatchLoop()` /
 
 ```
 cendance/
-├── CMakeLists.txt          # Build config (JUCE + FTXUI)
-├── JUCE/                   # JUCE framework (git submodule)
+├── CMakeLists.txt       # App, package, and test targets
+├── JUCE/                # JUCE framework submodule
+├── Resources/           # Manual, bundled audio, and asset licenses
 ├── Source/
-│   └── Main.cpp            # Entry point
-└── build/                  # Build output (gitignored)
-    └── cendance_artefacts/
-        └── cendance          # The executable
+│   ├── App/             # State, commands, packages, and persistence
+│   ├── Audio/           # Engine, DSP, generators, synths, and harmony
+│   ├── Config/          # User-data paths and sharing acknowledgement
+│   ├── Mcp/             # Embedded MCP stdio server and tool handlers
+│   ├── Network/         # Local/HTTP sharing backends and discovery
+│   ├── Security/        # Signed envelopes and verification
+│   ├── UI/              # FTXUI app and localhost agent protocol
+│   └── Main.cpp         # Process startup and runtime orchestration
+├── Tests/               # Unit and integration test executables
+└── build/               # Generated output (ignored)
 ```
+
+`CMakeLists.txt` currently registers 22 CTest targets. Use
+`ctest --test-dir build -N` to list the authoritative set; do not maintain a
+separate hard-coded test inventory in documentation.
 
 ## Dependencies
 

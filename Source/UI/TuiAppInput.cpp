@@ -21,7 +21,6 @@ bool TuiApp::handleEventInput(const ftxui::Event& event,
   using namespace ftxui;
   (void)currentMeters;
 
-  if (tosModalOpen) return handleToSInput(event, screen);
   if (onboardingTipsOpen) return handleOnboardingTipsInput(event);
   if (agentInputActive) return handleAgentInput(event, currentMeters);
   if (algorithmEditorOpen) return handleAlgorithmEditorInput(event);
